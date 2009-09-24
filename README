@@ -97,7 +97,7 @@ $ curl -X GET http://repoman.example.com/repository/myotherrepo/digg-example?for
 ...
 
 Build a package
-$ curl -X POST -d "cburl=http://repoman.example.com/repository/myotherrepo&ref=origin/knob&submodules=1" http://repoman.example.com/buildbot/dev/bobcat/siteapp
+$ curl -X POST -d "cburl=http://repoman.example.com/repository/myotherrepo&ref=origin/master" http://repoman.example.com/buildbot/github/synack/ncore
 
 There are a few POST arguments passed here...
  * '''ref''' - Git ref to be built. This can be a tag, commit id, branch, etc. Branches must be prefixed with origin/ (required)
