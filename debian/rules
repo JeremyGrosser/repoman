@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+DEB_PYTHON_SYSTEM=pysupport
+
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/python-distutils.mk
+
+binary-post-install/repoman::
+	mkdir -p $(CURDIR)/debian/repoman/etc/repoman
+	cp -r $(CURDIR)/conf/* $(CURDIR)/debian/repoman/etc/repoman/
+
+clean::
+	-rm -rf build

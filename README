@@ -1,0 +1,118 @@
+Repoman is a RESTful interface to our Debian repository.
+
+Get a list of available distributions
+$ curl -X GET http://repoman.example.com/repository/
+[
+    "anotherrepo", 
+    "myrepo", 
+    "myotherrepo"
+]
+
+Get a list of packages in a distribution
+$ curl -X GET http://repoman.example.com/repository/myrepo
+[
+    "libavahi-compat-libdnssd-dev", 
+    "hadoop-doc", 
+    "libavahi-common3", 
+    "libavahi-core5", 
+    "hadoop", 
+    "php5-pecl-http", 
+    ...
+]
+
+Get detailed information about a package
+$ curl -X GET http://repoman.example.com/repository/myrepo/php5
+[
+    {
+        "SHA1": "cae8b9a4a821237a24b5757566efdc95391090d4", 
+        "Maintainer": "Jeremy Grosser <synack@digg.com>", 
+        "Description": "server-side, HTML-embedded scripting language (meta-package) This package is a meta-package that, when installed, guarantees that you have at least one of the four server-side versions of the PHP5 interpreter installed.  Removing this package won't remove PHP5 from your system, however it may remove other packages that depend on this one. . PHP5 is an HTML-embedded scripting language. Much of its syntax is borrowed from C, Java and Perl with a couple of unique PHP-specific features thrown in. The goal of the language is to allow web developers to write dynamically generated pages quickly. . Homepage: http://www.php.net/", 
+        "Package": "php5", 
+        "Section": "web", 
+        "MD5sum": "0efa615337f0ba59d8369e4469884730", 
+        "Installed-Size": "20", 
+        "Filename": "pool/main/p/php5/php5_5.2.9-digg8_all.deb", 
+        "Priority": "normal", 
+        "Depends": "libapache2-mod-php5 (>= 5.2.9-digg8) | php5-cgi (>= 5.2.9-digg8), php5-common (>= 5.2.9-digg8)", 
+        "Version": "5.2.9-digg8", 
+        "Architecture": "all", 
+        "SHA256": "26844b968f6b51c1a02fd59c21455bf6ba47e46e47e53c6676af0ee4c2dd799b", 
+        "Size": "1024"
+    }
+]
+
+Add a new package to a distribution
+$ tar -tzvf package.tar.gz 
+-rw-r--r-- root/root      1143 2009-08-19 00:20 digg-example_0.1-1.dsc
+-rw-r--r-- root/root    651952 2009-08-19 00:20 digg-example_0.1-1.tar.gz
+-rw-r--r-- root/root     53888 2009-08-19 00:20 digg-example_0.1-1_all.deb
+-rw-r--r-- root/root      1717 2009-08-19 00:20 digg-example_0.1-1_amd64.changes
+
+$ curl -F"package=@package.tar.gz;type=application/x-tar-gz" http://repoman.example.com/repository/myotherrepo
+[
+    [
+        {
+            "SHA1": "18327ff3b2ac4e364baf700484fa487a78847a7a", 
+            "Maintainer": "Jeremy Grosser <synack@digg.com>", 
+            "Description": "Example package", 
+            "Package": "digg-example", 
+            "Section": "python", 
+            "MD5sum": "4bbbee22e1ccbba6a2287f46e12c1b4b", 
+            "Installed-Size": "836", 
+            "Filename": "pool/main/d/digg-example/digg-example_0.1-1_all.deb", 
+            "Priority": "normal", 
+            "Depends": "python, python-support (>= 0.90.0)", 
+            "Version": "0.1-1", 
+            "Architecture": "all", 
+            "SHA256": "23c31968821ac71a5b788ba193b92b48c78c9d677b2ba32823b9c8111387a2ea", 
+            "Python-Version": "2.4, 2.5, 2.6", 
+            "Size": "53888"
+        }
+    ]
+]
+
+Copy a package from one distribution to another
+$ curl -X POST http://repoman.example.com/repository/myotherrepo/digg-example/copy?dstdist=anotherrepo
+
+Delete a package from a distribution
+$ curl -X DELETE http://repoman.example.com/repository/anotherrepo/digg-example
+
+
+You may optionally pass a query argument to specify an output format. Valid formats are json (default), yaml, xml, and pickle
+$ curl -X GET http://repoman.example.com/repository/myotherrepo/digg-example?format=xml
+<?xml version='1.0'?>
+<methodResponse>
+<params>
+<param>
+<value><array><data>
+<value><struct>
+<member>
+<name>SHA1</name>
+<value><string>18327ff3b2ac4e364baf700484fa487a78847a7a</string></value>
+</member>
+<member>
+<name>Maintainer</name>
+<value><string>Jeremy Grosser &lt;synack@digg.com&gt;</string></value>
+</member>
+...
+
+Build a package
+$ curl -X POST -d "cburl=http://repoman.example.com/repository/myotherrepo&ref=origin/knob&submodules=1" http://repoman.example.com/buildbot/dev/bobcat/siteapp
+
+There are a few POST arguments passed here...
+ * '''ref''' - Git ref to be built. This can be a tag, commit id, branch, etc. Branches must be prefixed with origin/ (required)
+ * '''cburl''' - URL to post the resulting build tarball to. (optional)
+ * '''submodules''' - If this option is specified, the buildbot will attempt to update submodules before building. (optional)
+
+The response to a properly formed POST will be a build ID hash.
+
+Get the status of a build
+$ curl -X GET http://repoman.example.com/buildbot/status/f82334b6664a4739a8c341544feec898
+Build complete.
+
+The last component of the URL is the build ID returned by the initial build POST. Completed builds may only show in status for up to 24 hours. After which, the build directories are cleaned and removed.
+
+Get the build package tarball
+curl -X GET http://repoman.example.com/buildbot/tarball/f82334b6664a4739a8c341544feec898
+
+Returns the tarball binary if the build is done or an informative message otherwise. Completed builds may only be available for up to 24 hours. After which, the build directories are cleaned and removed.
