@@ -88,6 +88,24 @@ class PackageHandler(RequestHandler):
         buildq.put((gitpath, ref, buildid, cburl, submodules))
         return Response(status=200, body=buildid + '\n')
 
+    def options(self, gitpath=None, gitrepo=None):
+        return Response(status=200, headers=[
+            ('Access-Control-Allow-Origin', 'http://lmgmt.digg.internal'),
+            ('Access-Control-Allow-Methods', 'POST, GET, OPTIONS'),
+            ('Access-Control-Allow-Headers', 'x-requested-with'),
+        ])
+
+class RepoListHandler(RequestHandler):
+    def get(self, gitpath):
+        try:
+            gitindex = conf('buildbot.gitindex.%s' % gitpath)
+        except KeyError:
+            return Response(status=404, body='Unknown git path')
+        response = urllib.urlopen(gitindex)
+        index = response.read()
+        index = [x.strip('\r\n ').split(' ')[0].rsplit('.')[0] for x in index.split('\n') if x.strip('\r\n ')]
+        return Response(status=200, body=dumps(self.request.params, index))
+
 class TarballHandler(RequestHandler):
     def get(self, buildid):
         builddir = os.path.join(conf('buildbot.buildpath'), buildid)
@@ -109,10 +127,21 @@ class StatusHandler(RequestHandler):
         if not os.path.exists(builddir):
             return Response(status=404, body='The build ID does not exist.\n')
 
+        try:
+            log = file('%s/build.log' % builddir, 'r').read()
+        except:
+            log = ''
         if not os.path.exists(builddir + '/package.tar.gz'):
-            return Response(status=400, body='The build is not done yet.\n')
+            return Response(status=400, body='The build is not done yet.\n' + log)
         else:
-            return Response(status=200, body='Build complete.\n')
+            return Response(status=200, body='Build complete.\n' + log)
+
+def buildlog(buildid, message):
+    filename = os.path.join(conf('buildbot.buildpath'), '%s/build.log' % buildid)
+    fd = file(filename, 'a+')
+    fd.write(message + '\n')
+    fd.close()
+    logging.debug(message)
 
 def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
     tmpdir = os.path.join(conf('buildbot.buildpath'), buildid)
@@ -120,28 +149,35 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
 
     output, retcode = repo.clone(gitpath)
     if retcode:
-        logging.warning('Unable to clone %s. %s\n' % (gitpath, '\n'.join(output)))
+        buildlog(buildid, 'Unable to clone %s. %s\n' % (gitpath, '\n'.join(output)))
         return
 
     output, retcode = repo.checkout(ref)
     if retcode:
-        logging.warning('Unable to checkout %s. %s\n' % (ref, '\n'.join(output)))
+        buildlog(buildid, 'Unable to checkout %s. %s\n' % (ref, '\n'.join(output)))
         return
 
     if submodules:
         output, retcode = repo.submodule_init()
+        buildlog(buildid, output[0])
+        buildlog(buildid, output[1])
         output, retcode = repo.submodule_update()
+        buildlog(buildid, output[0])
+        buildlog(buildid, output[1])
 
     resultsdir = os.path.join(tmpdir, '.build_results')
     os.makedirs(resultsdir)
     output, retcode = repo.build(conf('buildbot.signkey'), conf('buildbot.pbuilderrc'), resultsdir)
 
+    buildlog(buildid, output[0])
+    buildlog(buildid, output[1])
     #logging.debug(output[0])
     #logging.debug(output[1])
 
     os.chdir(resultsdir)
     if not os.listdir(resultsdir) or retcode != 0:
-        logging.warning('Nothing in results directory.')
+        buildlog(buildid, 'Nothing in results directory. Giving up.')
+        return
 
     tarpath = os.path.join(tmpdir, 'package.tar.gz')
     tar = tarfile.open(tarpath, 'w:gz')
@@ -149,22 +185,24 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
         tar.add(name)
     tar.close()
 
-    logging.info('Build complete. Results in %s\n' % tarpath)
+    buildlog(buildid, 'Build complete. Results in %s\n' % tarpath)
     data = file(tarpath, 'rb').read()
-    logging.info('Built %i byte tarball' % len(data))
+    buildlog(buildid, 'Built %i byte tarball' % len(data))
 
     if cburl:
-        logging.info('Performing callback: %s' % cburl)
+        buildlog(buildid, 'Performing callback: %s' % cburl)
         req = Curl()
         req.setopt(req.POST, 1)
         req.setopt(req.URL, cburl)
         req.setopt(req.HTTPPOST, [('package', (req.FORM_FILE, str(tarpath)))])
+        req.setopt(req.WRITEDATA, file('%s/build.log' % tmpdir, 'a+'))
         req.perform()
         req.close()
 
 def build_worker():
     logging.info('Build worker process now running, pid %i' % os.getpid())
     while True:
+        logging.info('Build queue is %i jobs deep' % buildq.qsize())
         try:
             job = buildq.get()
             print 'jobspec:', repr(job)

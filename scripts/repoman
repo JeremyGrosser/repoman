@@ -26,6 +26,8 @@ app = Application([
         buildbot.TarballHandler),
     ('^/buildbot/(?P<gitpath>[a-z]+)/(?P<gitrepo>.+)/*$',
         buildbot.PackageHandler),
+    ('^/buildbot/(?P<gitpath>[a-z]+)/*$',
+        buildbot.RepoListHandler),
 ])
 
 wsgi = WSGIRequestHandler
