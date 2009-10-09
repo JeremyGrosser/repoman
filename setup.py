@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='repoman',
-    version='1.0',
+    version='1.1',
     description='RESTful repository management and buildbot for debian packages',
     author='Jeremy Grosser',
     author_email='synack@digg.com',

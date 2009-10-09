@@ -1,3 +1,9 @@
+repoman (1.1-1) unstable; urgency=low
+
+  * Make config more robust and display build logs to the user
+
+ -- Jeremy Grosser <synack@digg.com>  Fri, 09 Oct 2009 13:35:44 -0700
+
 repoman (1.0-1) unstable; urgency=low
 
   * Initial release
