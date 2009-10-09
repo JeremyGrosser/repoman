@@ -88,13 +88,6 @@ class PackageHandler(RequestHandler):
         buildq.put((gitpath, ref, buildid, cburl, submodules))
         return Response(status=200, body=buildid + '\n')
 
-    def options(self, gitpath=None, gitrepo=None):
-        return Response(status=200, headers=[
-            ('Access-Control-Allow-Origin', 'http://lmgmt.digg.internal'),
-            ('Access-Control-Allow-Methods', 'POST, GET, OPTIONS'),
-            ('Access-Control-Allow-Headers', 'x-requested-with'),
-        ])
-
 class RepoListHandler(RequestHandler):
     def get(self, gitpath):
         try:
