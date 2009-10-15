@@ -1,0 +1,142 @@
+body {
+	font-family: "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Verdana", "Arial", sans-serif;
+	font-size: 8pt;
+	padding: 0;
+	margin: 0;
+}
+
+#container {
+	width: 100%;
+}
+
+#filters {
+	float: left;
+	width: 25%;
+}
+
+#detail {
+	float: left;
+	width: 70%;
+}
+
+#search_results {
+	display: none;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+#filters fieldset {
+	margin: 1em;
+	border: 1px solid #202D26;
+	width: 80%; 
+}
+
+#build input[@type=text] {
+	width: 100%;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+#detail fieldset {
+	margin: 1em;
+	border: 1px solid #202D26;
+	float: left;
+	clear: right;
+	width: 100%;
+	overflow: none;
+}
+
+#spinner {
+	width: 100%;
+	text-align: center;
+}
+
+#log {
+	width: 620px;
+	font-family: monospace;
+	overflow-x: auto;
+}
+
+#detail label {
+	float: left;
+	width: 25%;
+	margin-right: 0.5em;
+	padding-top: 0.2em;
+	text-align: right;
+}
+
+#detail #startbutton {
+	clear: both;
+	padding-top: 0.5em;
+	padding-left: 0.5em;
+	margin-left: 25%;
+}
+
+legend {
+	color: #FFF;
+	background-color: #67746C;
+	border: 1px solid #202D26;
+	padding: 2px 6px;
+}
+
+fieldset.search legend {
+	background-color: #072b76;
+}
+
+.subtext {
+	font-size: 8pt;
+	color: #999;
+	width: 100%;
+	text-align: center;
+}
+
+.item {
+	color: #00F;
+	text-decoration: underline;
+	display: block;
+}
+
+.actions, .contents, .parents, .attrs {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+.col, .key, .value {
+	float: left;
+	margin-right: 1em;
+	overflow: hidden;
+}
+
+.key {
+	width: 30%;
+}
+
+.value {
+	width: 65%;
+}
+
+.warning {
+	background-color: #DFD;
+}
+
+.delete {
+	color: #F00;
+}
+
+ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+li {
+	display: block;
+	clear: both;
+}
+
+a, a:link a:visited a:active a:hover {
+	color: #00F;
+	text-decoration: underline;
+}
