@@ -7,8 +7,8 @@ include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
 
 binary-post-install/repoman::
-	mkdir -p $(CURDIR)/debian/repoman/etc/repoman
 	cp -r $(CURDIR)/conf/* $(CURDIR)/debian/repoman/etc/repoman/
+	cp -r $(CURDIR)/html $(CURDIR)/debian/repoman/usr/share/repoman/
 
 clean::
 	-rm -rf build

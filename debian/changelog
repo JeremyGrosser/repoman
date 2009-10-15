@@ -1,3 +1,9 @@
+repoman (1.2-1) unstable; urgency=low
+
+  * New version with JavaScript UI
+
+ -- Jeremy Grosser <synack@digg.com>  Thu, 15 Oct 2009 15:06:55 -0700
+
 repoman (1.1-1) unstable; urgency=low
 
   * Make config more robust and display build logs to the user
