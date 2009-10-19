@@ -6,6 +6,8 @@ if conf('server.daemonize'):
     become_daemon(out_log=conf('server.daemon_log'), err_log=conf('server.daemon_log'))
 
 from wsgiref.simple_server import make_server, WSGIRequestHandler
+from traceback import format_exc
+import sys
 
 from repoman.wsgi import Application
 from repoman import repository
@@ -35,5 +37,13 @@ def address_string(self):
     return self.client_address[0]
 wsgi.address_string = address_string
 
+p = Process(target=buildbot.build_worker)
+p.start()
+
 server = make_server(conf('server.bind_address'), conf('server.bind_port'), app)
-server.serve_forever()
+
+try:
+    server.serve_forever()
+except:
+    sys.stderr.write(format_exc() + '\n')
+    p.terminate()

@@ -202,5 +202,3 @@ def build_worker():
             build_thread(*job)
         except:
             logging.warning('Build worker caught exception: %s' % format_exc())
-p = Process(target=build_worker)
-p.start()
