@@ -3,7 +3,7 @@ from webob import Response
 from pycurl import Curl
 
 from subprocess import Popen, PIPE
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 from traceback import format_exc
 from time import sleep
 import logging
