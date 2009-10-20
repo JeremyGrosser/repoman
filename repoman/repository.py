@@ -37,6 +37,20 @@ class Repository(object):
             results.append(dist)
         return results
 
+    def create_dist(self, distinfo):
+        if distinfo['Codename'] in self.get_dists():
+            raise ValueError('Cannot create distribution %s, it already exists' % label)
+
+        dist = ['%s: %s' % (k, v) for k, v in distinfo.items() if k and v]
+        dist.insert(0, '')
+        dist = '\n'.join(dist)
+
+        fd = file(os.path.join(self.path, 'conf/distributions'), 'a')
+        fd.write(dist)
+        fd.close()
+
+        self._reprepro('export')
+
     def get_packages(self, dist):
         # This code is evil and ugly... Don't stare at it for too long
         results = {}
@@ -96,6 +110,20 @@ class RepoHandler(RequestHandler):
     def get(self):
         repo = Repository(conf('repository.path'))
         return Response(body=dumps(self.request.params, repo.get_dists()))
+
+    def post(self):
+        repo = Repository(conf('repository.path'))
+        dist = {
+            'Version': '5.0',
+            'Architectures': 'amd64 source any',
+            'Components': 'main contrib non-free',
+            'Description': 'Default package repository',
+        }
+        dist.update(loads(self.request.params, self.request.body))
+        for field in ['Origin', 'Label', 'Suite', 'Codename']:
+            if not field in dist:
+                return Response(status=400, body='Required field %s is missing.' % field)
+        repo.create_dist(dist)
 
 class DistHandler(RequestHandler):
     def get(self, dist=None, action=None):
