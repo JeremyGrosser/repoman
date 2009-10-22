@@ -13,6 +13,11 @@ import uuid
 
 from config import conf
 
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 def unique(lst):
     s = {}
     [s.__setitem__(repr(p), p) for p in lst]
@@ -119,7 +124,7 @@ class RepoHandler(RequestHandler):
             'Components': 'main contrib non-free',
             'Description': 'Default package repository',
         }
-        dist.update(loads(self.request.params, self.request.body))
+        dist.update(json.loads(self.request.body))
         for field in ['Origin', 'Label', 'Suite', 'Codename']:
             if not field in dist:
                 return Response(status=400, body='Required field %s is missing.' % field)

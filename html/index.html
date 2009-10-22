@@ -10,6 +10,7 @@ var gitref = '';
 var repolist = [];
 var distlist = [];
 var selected = {};
+var statusurl = '';
 
 function package_list(dist) {
 	selected['dist'] = dist;
@@ -46,7 +47,7 @@ function package_detail() {
 			$.post(apiurl + '/repository/' + selected['package'] + '/copy', {
 				dstdist: this.name
 			}, function(data, textStatus) {
-				$('#detail #status').append(selected['package'] + ' has been copied to ' + selected['dstdist']);
+				$('#detail #status').append(selected['package'] + ' has been copied to ' + selected['dstdist'] + '<br />');
 				$('#detail #status').fadeIn('slow');
 			});
 		});
@@ -82,6 +83,11 @@ function search_gitlist() {
 	}
 
 	$('#gitlist a').click(build_detail);
+
+	// Dirty hack.
+	if(results.length == 1) {
+		$('#gitlist a').trigger('click');
+	}
 }
 
 function build_detail() {
@@ -100,7 +106,10 @@ function build_detail() {
 
 function build_options() {
 	gitref = this.name;
-	$('#detail').append('<fieldset id="options"><legend>Build options</legend><label for="upload">Upload to:</label><select name="upload"></select><div id="startbutton"><input type="button" name="start" value="Start build" /></div></fieldset>');
+	$('#detail #options').remove();
+	$('#detail #status').remove();
+	statusurl = null;
+	$('#detail').append('<fieldset id="options"><legend>Build ' + this.innerHTML + '</legend><label for="upload">Upload to:</label><select name="upload"></select><div id="startbutton"><input type="button" name="start" value="Start build" /></div></fieldset>');
 	for(i = 0; i < distlist.length; i++) {
 		if(distlist[i] != default_dist) {
 			$('#detail [name=upload]').append('<option value="' + distlist[i] + '">' + distlist[i] + '</option>');
@@ -115,11 +124,11 @@ function build_options() {
 function build_start() {
 	uploadto = $('#detail [name=upload]').val();
 	$('#detail #options').remove();
+	$('#detail #status').remove();
 	// We have access to the gitrepo variable here for some reason
 	// Javascript has weird scoping rules
 	//gitref = this.name;
-	$('#detail').append('<fieldset id="status"><legend>Build status</legend><div id="spinner" style="display: none;"><img src="img/spinner.gif" alt="spinner" /></div></fieldset>');
-	$('#status').append('<div id="log"></div>');
+	$('#detail').append('<fieldset id="status"><legend>Build status</legend><div id="spinner" style="display: none;"><img src="img/spinner.gif" alt="spinner" /></div><div id="log"></div></fieldset>');
 
 	$.post(apiurl + '/buildbot/' + gitrepo + '.git', {
 			ref: gitref,
@@ -129,6 +138,7 @@ function build_start() {
 		function(data) {
 			buildid = data;
 			$('#spinner').show();
+			statusurl = '/buildbot/status/' + buildid;
 			setTimeout(build_status, 3000);
 		});
 }
@@ -147,11 +157,13 @@ function build_update(data, textStatus) {
 }
 
 function build_status() {
-	$.ajax({
-		type: 'GET',
-		url: apiurl + '/buildbot/status/' + buildid,
-		complete: build_update
-	});
+	if(statusurl != null) {
+		$.ajax({
+			type: 'GET',
+			url: apiurl + statusurl,
+			complete: build_update
+		});
+	}
 }
 
 $(document).ready(function() {
