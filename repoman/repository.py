@@ -221,7 +221,9 @@ class PackageHandler(RequestHandler):
         if not dist or not package or not action:
             return Response(status=405)
 
-        if self.request.params.get('dstdist', None) == 'digg-stable-lenny':
+        if self.request.params.get('dstdist', None) == 'digg-stable-lenny' and \
+            not package in conf('repository.whitelist'):
+
             if not self.basic_auth():
                 return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
 
