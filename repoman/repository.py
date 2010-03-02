@@ -112,6 +112,19 @@ class Repository(object):
         self.sign(dist)
         return output[1]
 
+    def backup_package(self, dist, backupdist, package):
+        logging.info('Backing up %s from %s to %s' % (package, dist, backupdist))
+        self.remove_package(backupdist, package)
+        self.copy_package(dist, backupdist, package)
+
+    def rollback_package(self, dist, backupdist, package):
+        logging.info('Rolling back %s from %s to %s' % (package, backupdist, dist))
+        if not self.get_package(backupdist, package):
+            logging.error('%s does not exist in %s, unable to rollback' % (package, backupdist))
+            return False
+        self.remove_package(dist, package)
+        self.copy_package(backupdist, dist, package)
+
 class RepoHandler(RequestHandler):
     def get(self):
         repo = Repository(conf('repository.path'))
@@ -223,18 +236,34 @@ class PackageHandler(RequestHandler):
 
         if self.request.params.get('dstdist', None) == 'digg-stable-lenny' and \
             not package in conf('repository.whitelist'):
-
             if not self.basic_auth():
                 return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
 
         if action == 'copy':
             if not 'dstdist' in self.request.params:
                 return Response(status=400, body='A required parameter, dstdist is missing')
+            if self.request.params['dstdist'] == 'digg-stable-lenny':
+                
+                repo.backup_package(self.request.params['dstdist'], conf('repository.backupdist'), package)
+
             repo.copy_package(dist, self.request.params['dstdist'], package)
+            return Response(status=200)
+        
+        if action == 'rollback':
+            if dist != 'digg-stable-lenny':
+                errormsg = "Attempt to rollback in a dist other than digg-stable-lenny. You probably don't want this. Refusing to do it."
+                logging.error(errormsg)
+                return Response(status=400, body=errormsg + '\n')
+            repo.rollback_package(dist, conf('repository.backupdist'), package)
             return Response(status=200)
 
     def delete(self, dist=None, package=None, action=None):
         repo = Repository(conf('repository.path'))
+
+        if self.request.params.get('dstdist', None) == 'digg-stable-lenny' and \
+            not package in conf('repository.whitelist'):
+            if not self.basic_auth():
+                return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
 
         if action:
             return Response(status=405, body='You cannot delete an action')
