@@ -10,6 +10,6 @@ XS-Python-Version: all
 Package: repoman
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, python-ncore, python-simplejson, python-webob, python-pycurl, python-multiprocessing, reprepro, gnupg, pbuilder
+Depends: ${python:Depends}, python-ncore, python-simplejson, python-webob, python-pycurl, reprepro, gnupg, pbuilder
 Description: RESTful repository management and buildbot
  A reprepro and pbuilder management API with a RESTful interface
