@@ -186,7 +186,7 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
         buildlog(buildid, 'Performing callback: %s' % cburl)
         req = Curl()
         req.setopt(req.POST, 1)
-        req.setopt(req.URL, cburl)
+        req.setopt(req.URL, str(cburl))
         req.setopt(req.HTTPPOST, [('package', (req.FORM_FILE, str(tarpath)))])
         req.setopt(req.WRITEDATA, file('%s/build.log' % tmpdir, 'a+'))
         req.perform()

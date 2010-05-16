@@ -1,3 +1,9 @@
+repoman (1.4.6-1) lucid; urgency=low
+
+  * Don't pass unicode to pycurl 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 13:09:01 -0500
+
 repoman (1.4.5-1) lucid; urgency=low
 
   * Fix index.html path 
