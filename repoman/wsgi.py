@@ -1,11 +1,22 @@
 from webob import Request, Response
 import httplib
+import os.path
 import re
+
+from config import conf
 
 class RequestHandler(object):
     def __init__(self, app, request):
         self.app = app
         self.request = request
+
+class StaticHandler(RequestHandler):
+    def get(self, request, path):
+        path = os.path.join(conf('server.static_path'), path)
+        if not path.startswith(conf('server.static_path')):
+            return Response(status=400, body='400 Bad Request')
+        else:
+            return Response(status=200, body=file(path, 'rb').read())
 
 class Application(object):
     def __init__(self, urls):
