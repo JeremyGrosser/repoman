@@ -11,9 +11,12 @@ class RequestHandler(object):
         self.request = request
 
 class StaticHandler(RequestHandler):
-    def get(self, request, path):
-        path = os.path.join(conf('server.static_path'), path)
-        if not path.startswith(conf('server.static_path')):
+    def get(self, path):
+        if path.strip('/') == '':
+            path = '/index.html'
+        root = conf('server.static_path')
+        path = os.path.join(root, path)
+        if not path.startswith(root):
             return Response(status=400, body='400 Bad Request')
         else:
             return Response(status=200, body=file(path, 'rb').read())

@@ -1,3 +1,21 @@
+repoman (1.4.3-1) lucid; urgency=low
+
+  * Empty path means index.html 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 00:30:11 -0500
+
+repoman (1.4.2-1) lucid; urgency=low
+
+  * Tweak the static URL pattern 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 00:24:07 -0500
+
+repoman (1.4.1-1) lucid; urgency=low
+
+  * Fix static handler method signature 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 00:10:57 -0500
+
 repoman (1.4-1) lucid; urgency=low
 
   * Add a static file handler 
