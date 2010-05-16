@@ -13,7 +13,7 @@ class RequestHandler(object):
 class StaticHandler(RequestHandler):
     def get(self, path):
         if path.strip('/') == '':
-            path = '/index.html'
+            path = 'index.html'
         root = conf('server.static_path')
         path = os.path.join(root, path)
         if not path.startswith(root):

@@ -1,3 +1,15 @@
+repoman (1.4.5-1) lucid; urgency=low
+
+  * Fix index.html path 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 12:52:32 -0500
+
+repoman (1.4.4-1) lucid; urgency=low
+
+  * Get rid of leading slash 
+
+ -- Jeremy Grosser <synack@digg.com>  Sun, 16 May 2010 00:33:45 -0500
+
 repoman (1.4.3-1) lucid; urgency=low
 
   * Empty path means index.html 
