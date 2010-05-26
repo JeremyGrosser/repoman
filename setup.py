@@ -11,7 +11,7 @@ setup(name='repoman',
     author='Jeremy Grosser',
     author_email='synack@digg.com',
     entry_points={
-        'console_scripts': ['repoman = repoman.cli:main'],
+        'console_scripts': ['repoman d= repoman.server:main'],
         },
     packages=['repoman'],
     install_requires=['ncore>=1.6',

@@ -57,7 +57,3 @@ def main():
         sys.stderr.write(format_exc() + '\n')
         if 'p' in locals():
             p.terminate()
-
-
-if __name__ == '__main__':
-    main()
