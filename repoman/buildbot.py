@@ -61,9 +61,9 @@ class GitRepository(object):
 
     def build(self, signkey, pbuilderrc, resultsdir):
         if 'refs/heads/upstream' in [x[1] for x in self.show_ref()]:
-            cmd = ['/usr/bin/git-buildpackage', '--git-sign', '--git-cleaner="fakeroot debian/rules clean"', '--git-keyid="%s"' % signkey, '--git-builder="pdebuild --debsign-k %s --auto-debsign --configfile %s --debbuildopts "-i.git -sa" --buildresult %s' % (signkey, pbuilderrc, resultsdir)]
+            cmd = ['/usr/bin/git-buildpackage', '--git-sign', '--git-cleaner="fakeroot debian/rules clean"', '--git-keyid="%s"' % signkey, '--git-builder="pdebuild --debsign-k %s --auto-debsign --configfile %s --debbuildopts "-i.git -I.git -sa" --buildresult %s' % (signkey, pbuilderrc, resultsdir)]
         else:
-            cmd = ['/usr/bin/pdebuild', '--debsign-k', signkey, '--auto-debsign', '--debbuildopts', '-i.git -sa', '--configfile', pbuilderrc, '--buildresult', resultsdir]
+            cmd = ['/usr/bin/pdebuild', '--debsign-k', signkey, '--auto-debsign', '--debbuildopts', '-i.git -I.git -sa', '--configfile', pbuilderrc, '--buildresult', resultsdir]
         return self._cmd(cmd)
 
 class PackageHandler(RequestHandler):
