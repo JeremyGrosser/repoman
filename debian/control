@@ -1,15 +1,22 @@
 Source: repoman
-Section: misc
+Section: python
 Priority: extra
 Maintainer: Jeremy Grosser <synack@digg.com>
 Build-Depends: cdbs, debhelper (>= 7)
 Build-Depends-Indep: python-dev, python-support(>= 0.2.3)
-Standards-Version: 3.7.3
+Standards-Version: 3.8.4
 XS-Python-Version: all
 
-Package: repoman
+Package: python-repoman-server
 Architecture: all
 XB-Python-Version: ${python:Versions}
 Depends: ${python:Depends}, python-ncore, python-simplejson, python-webob, python-pycurl, reprepro, gnupg, pbuilder
-Description: RESTful repository management and buildbot
+Description: RESTful repository management and buildbot (server)
  A reprepro and pbuilder management API with a RESTful interface
+
+Package: python-repoman-client
+Architecture: all
+XB-Python-Version: ${python:Versions}
+Depends: ${python:Depends}, python-decorator, python-poster, python-simplejson, python-httplib2
+Description: RESTful repository management and buildbot (client)
+ A command-line client for interacting with repoman servers.
