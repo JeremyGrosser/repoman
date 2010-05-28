@@ -4,13 +4,17 @@
 	<link rel="stylesheet" type="text/css" href="css/base.css" />
 	<script type="text/javascript" src="js/jquery.js"></script>
 	<script type="text/javascript">
-var apiurl = "http://127.0.0.1:9998/";
+var apiurl = undefined;
 var default_dist = 'example-unstable-lenny';
 var gitref = '';
 var repolist = [];
 var distlist = [];
 var selected = {};
 var statusurl = '';
+
+if (typeof(apiurl) == "undefined") {
+    apiurl = window.location.protocol + "//" + window.location.host;
+}
 
 function package_list(dist) {
 	selected['dist'] = dist;

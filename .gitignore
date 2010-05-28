@@ -1,0 +1,7 @@
+*.pyc
+/*.egg-info
+/bin
+/include
+/lib
+/.Python
+/repoman.log
