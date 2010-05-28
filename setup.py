@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='repoman',
-    version='1.3',
+    version='1.5.0',
     description='RESTful Debian repo manageer and package builder',
     author='Jeremy Grosser',
     author_email='synack@digg.com',

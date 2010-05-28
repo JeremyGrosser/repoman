@@ -1,3 +1,9 @@
+repoman (1.5.0-1) unstable; urgency=low
+
+  * Pull in changes from ieure, rename repoman to repomand, add CLI client
+
+ -- Jeremy Grosser <synack@digg.com>  Thu, 27 May 2010 22:20:49 -0700
+
 repoman (1.4.6-1) lucid; urgency=low
 
   * Don't pass unicode to pycurl 
