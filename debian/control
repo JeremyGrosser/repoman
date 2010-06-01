@@ -10,13 +10,13 @@ XS-Python-Version: all
 Package: python-repoman-server
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-decorator (>= 3.1.2), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0), reprepro, gnupg, pbuilder
+Depends: ${python:Depends}, python-daemon (>= 1.5.0), python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-decorator (>= 3.1.2), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0), reprepro, gnupg, pbuilder
 Description: RESTful repository management and buildbot (server)
  A reprepro and pbuilder management API with a RESTful interface
 
 Package: python-repoman-client
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-decorator (>= 3.1.2), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0)
+Depends: ${python:Depends}, python-daemon (>= 1.5.0), python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-decorator (>= 3.1.2), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0)
 Description: RESTful repository management and buildbot (client)
  A command-line client for interacting with repoman servers.
