@@ -8,7 +8,7 @@ from config import conf
 
 import buildbot
 import repository
-from common import RequestHandler, StaticHandler, WSGIRequestHandler
+from common import StaticHandler, WSGIRequestHandler
 
 
 class Application(object):
