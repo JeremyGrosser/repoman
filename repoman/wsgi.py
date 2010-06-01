@@ -2,28 +2,20 @@ from webob import Request, Response
 import httplib
 import os.path
 import re
+from wsgiref.simple_server import make_server
 
 from config import conf
 
-class RequestHandler(object):
-    def __init__(self, app, request):
-        self.app = app
-        self.request = request
+import buildbot
+import repository
+from common import RequestHandler, StaticHandler, WSGIRequestHandler
 
-class StaticHandler(RequestHandler):
-    def get(self, path):
-        if path.strip('/') == '':
-            path = 'index.html'
-        root = conf('server.static_path')
-        path = os.path.join(root, path)
-        if not path.startswith(root):
-            return Response(status=400, body='400 Bad Request')
-        else:
-            return Response(status=200, body=file(path, 'rb').read())
 
 class Application(object):
-    def __init__(self, urls):
-        self.handlers = [(re.compile(pattern), handler) for pattern, handler in urls]
+    def __init__(self, extra_urls=None):
+        extra_urls = extra_urls or []
+        self.handlers = [(re.compile(pattern), handler)
+                         for pattern, handler in DEFAULT_URLS + extra_urls]
 
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -45,27 +37,30 @@ class Application(object):
 
         return response(environ, start_response)
 
-if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
 
-    if conf('server.daemonize'):
-        from ncore.daemon import become_daemon
-        become_daemon(out_log=conf('server.daemon_log'), err_log=conf('server.daemon_log'))
+def get_server():
+    return make_server(conf('server.bind_address'),
+                         conf('server.bind_port'), Application(),
+                         handler_class=WSGIRequestHandler)
 
-    app = WSGIApp([
-        ('/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/(?P<action>\w+)/*',
-            repository.PackageHandler),
-        ('/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/*',
-            repository.PackageHandler),
-        ('/repository/(?P<dist>[-\w]+)/*',
-            repository.DistHandler),
-        ('/repository/',
-            repository.RepoHandler),
-        ('/buildbot/tarball/(?P<buildid>[a-z0-9]{32})/*',
-            buildbot.BuildStatusHandler),
-        ('/buildbot/(?P<package>.+)/*',
-            buildbot.PackageHandler),
-    ])
 
-    server = make_server(conf('server.bind_address'), conf('server.bind_port'), app)
-    server.serve_forever()
+DEFAULT_URLS = [
+    ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/(?P<action>\w+)/*$',
+     repository.PackageHandler),
+    ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/*$',
+     repository.PackageHandler),
+    ('^/repository/(?P<dist>[-\w]+)/*$',
+     repository.DistHandler),
+    ('^/repository/*$',
+     repository.RepoHandler),
+    ('^/buildbot/status/(?P<buildid>[a-z0-9]{32})/*$',
+     buildbot.StatusHandler),
+    ('^/buildbot/tarball/(?P<buildid>[a-z0-9]{32})/*$',
+     buildbot.TarballHandler),
+    ('^/buildbot/(?P<gitpath>[a-z]+)/(?P<gitrepo>.+)/*$',
+     buildbot.PackageHandler),
+    ('^/buildbot/(?P<gitpath>[a-z]+)/*$',
+     buildbot.RepoListHandler),
+    ('^/(?P<path>.*)/*$',
+     StaticHandler),
+    ]

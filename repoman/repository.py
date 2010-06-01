@@ -1,7 +1,7 @@
 from ncore.serialize import dumps, loads
 from gnupg import GPG
 from webob import Response
-from wsgi import RequestHandler
+from common import RequestHandler
 
 from subprocess import Popen, PIPE
 import logging

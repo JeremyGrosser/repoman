@@ -4,42 +4,18 @@ import sys
 from traceback import format_exc
 from multiprocessing import Process
 
-from wsgiref.simple_server import make_server, WSGIRequestHandler
-from ncore.daemon import become_daemon
+from wsgiref.simple_server import make_server
+import daemon
 
 from repoman.config import conf
-from repoman.wsgi import Application, StaticHandler
+from repoman.wsgi import get_server
 from repoman import repository
 from repoman import buildbot
 
 
-class CustomWSGIRequestHandler(WSGIRequestHandler):
-
-    def address_string(self):
-        return self.client_address[0]
-
 
 def main():
-    app = Application([
-        ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/(?P<action>\w+)/*$',
-            repository.PackageHandler),
-        ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/*$',
-            repository.PackageHandler),
-        ('^/repository/(?P<dist>[-\w]+)/*$',
-            repository.DistHandler),
-        ('^/repository/*$',
-            repository.RepoHandler),
-        ('^/buildbot/status/(?P<buildid>[a-z0-9]{32})/*$',
-            buildbot.StatusHandler),
-        ('^/buildbot/tarball/(?P<buildid>[a-z0-9]{32})/*$',
-            buildbot.TarballHandler),
-        ('^/buildbot/(?P<gitpath>[a-z]+)/(?P<gitrepo>.+)/*$',
-            buildbot.PackageHandler),
-        ('^/buildbot/(?P<gitpath>[a-z]+)/*$',
-            buildbot.RepoListHandler),
-        ('^/(?P<path>.*)/*$',
-            StaticHandler),
-    ])
+    server = get_server()
 
     try:
         if conf('server.daemonize'):

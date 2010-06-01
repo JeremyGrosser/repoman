@@ -15,7 +15,7 @@ import sys
 import os
 
 from config import conf
-from wsgi import RequestHandler
+from common import RequestHandler
 
 buildq = Queue()
 
