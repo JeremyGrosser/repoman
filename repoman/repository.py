@@ -1,4 +1,4 @@
-from ncore.serialize import dumps, loads
+from simplejson import dumps, loads
 from gnupg import GPG
 from webob import Response
 from common import RequestHandler
@@ -114,7 +114,7 @@ class Repository(object):
 class RepoHandler(RequestHandler):
     def get(self):
         repo = Repository(conf('repository.path'))
-        return Response(body=dumps(self.request.params, repo.get_dists()))
+        return Response(body=dumps(repo.get_dists()))
 
     def post(self):
         repo = Repository(conf('repository.path'))
@@ -133,7 +133,7 @@ class RepoHandler(RequestHandler):
 class DistHandler(RequestHandler):
     def get(self, dist=None, action=None):
         repo = Repository(conf('repository.path'))
-        return Response(body=dumps(self.request.params, repo.get_packages(dist).keys()))
+        return Response(body=dumps(repo.get_packages(dist).keys()))
 
     def post(self, dist):
         repo = Repository(conf('repository.path'))
@@ -171,7 +171,7 @@ class DistHandler(RequestHandler):
                 for bin in p:
                     pkg = repo.get_package(dist, bin)
                     packages.append(pkg)
-        response = Response(status=200, body=dumps(self.request.params, packages))
+        response = Response(status=200, body=dumps(packages))
 
         for dirpath, dirnames, filenames in os.walk(basedir):
             for filename in filenames:
@@ -190,21 +190,21 @@ class PackageHandler(RequestHandler):
         if dist and package:
             pkg = repo.get_package(dist, package)
             if not pkg:
-                return Response(status=404, body=dumps(self.request.params, []))
+                return Response(status=404, body=dumps([]))
 
-            return Response(status=200, body=dumps(self.request.params, pkg))
+            return Response(status=200, body=dumps(pkg))
 
         if dist and not package:
             result = repo.get_packages(dist).keys()
             if not result:
-                return Response(status=404, body=dumps(self.request.params, []))
-            return Response(status=200, body=dumps(self.request.params, result))
+                return Response(status=404, body=dumps([]))
+            return Response(status=200, body=dumps(result))
 
         if not dist:
             result = repo.get_dists()
             if not result:
-                return Response(status=404, body=dumps(self.request.params, []))
-            return Response(status=200, body=dumps(self.request.params, result))
+                return Response(status=404, body=dumps([]))
+            return Response(status=200, body=dumps(result))
 
     def post(self, dist=None, package=None, action=None):
         repo = Repository(conf('repository.path'))

@@ -26,7 +26,6 @@ def get_context():
 
 
 
-
 def main():
     with get_context():
         get_server().serve_forever()

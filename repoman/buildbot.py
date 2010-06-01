@@ -1,4 +1,4 @@
-from ncore.serialize import dumps, loads
+from simplejson import dumps
 from webob import Response
 from pycurl import Curl
 
@@ -71,7 +71,7 @@ class PackageHandler(RequestHandler):
 
         repo = GitRepository()
         refs = repo.ls_remote(gitpath)
-        return Response(status=200, body=dumps(self.request.params, refs))
+        return Response(status=200, body=dumps(refs))
 
     def post(self, gitpath, gitrepo):
         if not 'ref' in self.request.params:
@@ -96,7 +96,7 @@ class RepoListHandler(RequestHandler):
         response = urllib.urlopen(gitindex)
         index = response.read()
         index = [x.strip('\r\n ').split(' ')[0].rsplit('.')[0] for x in index.split('\n') if x.strip('\r\n ')]
-        return Response(status=200, body=dumps(self.request.params, index))
+        return Response(status=200, body=dumps(index))
 
 class TarballHandler(RequestHandler):
     def get(self, buildid):
