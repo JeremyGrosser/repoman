@@ -5,3 +5,11 @@
 /lib
 /.Python
 /repoman.log
+/build
+/debian/python-repoman-server
+/debian/python-repoman-client
+/debian/*debhelper*
+/debian/*stamp*
+/debian/*.substvars
+/debian/tmp
+/debian/files
