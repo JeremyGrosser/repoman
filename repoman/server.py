@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from traceback import format_exc
-from multiprocessing import Process
 
-from wsgiref.simple_server import make_server
 import daemon
 
 from repoman.config import conf
@@ -12,24 +9,26 @@ from repoman.wsgi import get_server
 from repoman import repository
 from repoman import buildbot
 
+def get_context():
+    context = {'working_directory': '.',
+               'detach_process': False}
+    if conf('server.daemonize'):
+        log_file = open(conf('server.daemon_log'), 'w+')
+        context.update(detach_process=True,
+                       stdout=log_file,
+                       stderr=log_file)
+    else:
+        context.update(files_preserve=[sys.stdout, sys.stderr],
+                       stdout=sys.stdout,
+                       stderr=sys.stderr)
+
+    return daemon.DaemonContext(**context)
+
+
 
 
 def main():
-    server = get_server()
+    with get_context():
+        get_server().serve_forever()
 
-    try:
-        if conf('server.daemonize'):
-            become_daemon(out_log=conf('server.daemon_log'),
-                          err_log=conf('server.daemon_log'))
 
-        p = Process(target=buildbot.build_worker)
-        p.start()
-
-        server = make_server(conf('server.bind_address'),
-                             conf('server.bind_port'), app,
-                             handler_class=CustomWSGIRequestHandler)
-        server.serve_forever()
-    except:
-        sys.stderr.write(format_exc() + '\n')
-        if 'p' in locals():
-            p.terminate()

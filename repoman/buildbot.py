@@ -8,6 +8,7 @@ from traceback import format_exc
 from time import sleep
 import logging
 import tarfile
+import os
 import os.path
 import urllib
 import uuid
@@ -16,8 +17,6 @@ import os
 
 from config import conf
 from common import RequestHandler
-
-buildq = Queue()
 
 class GitRepository(object):
     def __init__(self, path=None):
@@ -85,7 +84,7 @@ class PackageHandler(RequestHandler):
 
         buildid = uuid.uuid4().hex
 
-        buildq.put((gitpath, ref, buildid, cburl, submodules))
+        build_worker(gitpath, ref, buildid, cburl, submodules)
         return Response(status=200, body=buildid + '\n')
 
 class RepoListHandler(RequestHandler):
@@ -192,13 +191,7 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
         req.perform()
         req.close()
 
-def build_worker():
-    logging.info('Build worker process now running, pid %i' % os.getpid())
-    while True:
-        logging.info('Build queue is %i jobs deep' % buildq.qsize())
-        try:
-            job = buildq.get()
-            print 'jobspec:', repr(job)
-            build_thread(*job)
-        except:
-            logging.warning('Build worker caught exception: %s' % format_exc())
+
+def build_worker(gitpath, ref, buildid, cburl, submodules):
+    if os.fork() == 0:
+        build_thread(gitpath, ref, buildid, cburl, submodules)
