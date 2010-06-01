@@ -1,3 +1,22 @@
+repoman (1.5.0-sg1) lucid; urgency=low
+
+  * Break Debian package into client and server, fix some lintian
+    issues.
+  * Break base request classes out to common.py, refactor dupe init code
+    into get_server() & DEFUALT_URLs.
+  * Use python-daemon instead of ncore.become_daemon. Don't use a queue
+    for building, fork as needed.
+  * Only support JSON serialization through SimpleJSON
+  * Ignore build artifacts
+  * Update dependencies for the new ncore-less code.
+  * Remove unused import.
+  * Update dependencies. Setuptools complains if anything listed in
+    setup.py's install_requires is missing, so we have to depend on
+    everything needed by client and server in both packages.
+  * Add missing python-daemon to dependency list.
+
+ -- Ian Eure <ian@simplegeo.com>  Tue, 01 Jun 2010 15:59:16 -0700
+
 repoman (1.5.0-1) unstable; urgency=low
 
   * Pull in changes from ieure, rename repoman to repomand, add CLI client
