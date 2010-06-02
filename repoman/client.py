@@ -110,15 +110,17 @@ def create_pack(changefile):
     with open(changefile) as change:
         contents = change.read()
         source_pkg = contents.split("Source:")[1].strip().split("\n")[0]
-        file_lines = contents.split("Files:")[1].strip().split("\n")
+        file_lines = (contents.split("Files:")[1].split("\n"))[1:]
+        file_lines = file_lines[:file_lines.index('')]
 
         tarball = tarfile.open("%s.tar.gz" % source_pkg, 'w:gz',
                                fileobj=output)
 
+        base_dir = os.path.dirname(changefile) or "."
         tarball.add(changefile, os.path.basename(changefile))
         for pkg_file in [line.split(" ")[-1] for line in file_lines]:
-            tarball.add("%s/%s" % (os.path.dirname(changefile), pkg_file),
-                        pkg_file)
+            tarball.add("%s/%s" % (base_dir, pkg_file), pkg_file)
+
 
         tarball.close()
 
