@@ -30,6 +30,11 @@ from poster.encode import multipart_encode, MultipartParam
 API_URL = os.getenv("REPOMAN_API_URL", "")
 
 
+class ArgumentError(Exception):
+
+    """Raised when invalid arguments are provided to a command."""
+
+
 def format_dict(pkg):
     """Return a string containing a nicely formatted dict."""
     width = max(imap(len, pkg.iterkeys()))
@@ -128,7 +133,10 @@ def create_pack(changefile):
 
 
 def cmd_pack(*changefiles):
-    """Create a packfile for uploading."""
+    """Create a packfile for uploading.
+
+    pack FILE1 [FILE2 ... FILEN]
+    """
     for changefile in changefiles:
         (name, contents) = create_pack(changefile)
         with open(name, 'w') as pack:
@@ -136,15 +144,24 @@ def cmd_pack(*changefiles):
 
 
 def cmd_upload(dist, *pack_files):
-    """Upload a package to the repo."""
+    """Upload a package to the repo.
+
+    upload DISTRIBUTION FILE1 [FILE2 ... FILEN]
+    """
+
+    if not pack_files:
+        raise ArgumentError("No packfiles specified.")
 
     buf = ""
     for file_ in pack_files:
+        print file_
+        sys.stdout.flush()
         if file_.endswith(".changes"):
             (file_, pack) = create_pack(file_)
         else:
             pack = open(file_, 'r')
 
+        print "Uploading %s" % file_
         try:
             (data, headers) = multipart_encode(
                 (MultipartParam('package', filename=file_, fileobj=pack),))
@@ -335,6 +352,9 @@ def main():
 
         if output:
             print output
+    except (TypeError, ArgumentError), ex:
+        print "Error: %s\n" % ex
+        print cmd_help(args[0])
     except ValueError, ex:
         print ex
         if ex.args and 'argument' in ex.args[0]:
