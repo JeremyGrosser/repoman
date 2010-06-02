@@ -27,7 +27,7 @@ import simplejson as json
 from httplib2 import Http
 from poster.encode import multipart_encode, MultipartParam
 
-API_URL = ""
+API_URL = os.getenv("REPOMAN_API_URL", "")
 
 
 def format_dict(pkg):
@@ -74,7 +74,7 @@ def get_parser():
     """Return an optionparser instance."""
     parser = OptionParser(get_commands())
     parser.add_option("-a", "--api", help="Base URL of the Repoman API.",
-                      default="http://lucid.local:9998")
+                      default=API_URL)
     parser.add_option("-d", "--debug", action="store_true",
                       help="Debug reqests & responses.")
     return parser
