@@ -23,7 +23,6 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from decorator import decorator
 import simplejson as json
 from httplib2 import Http
 from poster.encode import multipart_encode, MultipartParam
