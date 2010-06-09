@@ -7,7 +7,10 @@ include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
 
 binary-post-install/python-repoman::
-	cp -r $(CURDIR)/conf/* $(CURDIR)/debian/python-repoman/etc/repoman/
+	install -d -m 0755 $(CURDIR)/debian/python-repoman/etc/repoman/
+	install -m 0644 $(CURDIR)/conf/* $(CURDIR)/debian/python-repoman/etc/repoman/
+
+	install -d -m 0755 $(CURDIR)/debian/python-repoman/usr/share/repoman/
 	cp -r $(CURDIR)/html $(CURDIR)/debian/python-repoman/usr/share/repoman/
 
 clean::
