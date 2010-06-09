@@ -1,8 +1,9 @@
 repoman (1.5.1sg3) unstable; urgency=low
 
   * Fix upload code which broke in the refactor.
+  * Fix wrong README being included.
 
- -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 11:09:50 -0700
+ -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 11:12:49 -0700
 
 repoman (1.5.1sg2) unstable; urgency=low
 
