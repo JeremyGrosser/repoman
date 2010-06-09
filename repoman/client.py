@@ -109,25 +109,31 @@ def cmd_help(cmd):
     return dedent(globals()['cmd_%s' % cmd].__doc__)
 
 
+def _parse_changes(contents):
+    """Return a tuple of (source_pkg, (changed_files)) from a .changes file."""
+    return (
+        contents.split("Source:")[1].strip().split("\n")[0],
+        tuple(line.split(" ")[-1] for line in
+              takewhile(lambda line: line.startswith(" "),
+                        (contents.split("Files:")[1].split("\n"))[1:])))
+
+
 def create_pack(changefile):
     """Return a tuple of (filename, StringIO)."""
     output = StringIO()
-    with open(changefile) as change:
-        contents = change.read()
-        source_pkg = contents.split("Source:")[1].strip().split("\n")[0]
-        file_lines = takewhile(lambda line: line.startswith(" "),
-                               (contents.split("Files:")[1].split("\n"))[1:])
 
-        tarball = tarfile.open("%s.tar.gz" % source_pkg, 'w:gz',
-                               fileobj=output)
+    with open(changefile, 'r') as change:
+        (source_pkg, pkg_files) = _parse_changes(change.read())
+    tarball = tarfile.open("%s.tar.gz" % source_pkg, 'w:gz',
+                           fileobj=output)
 
-        base_dir = os.path.dirname(changefile) or "."
-        tarball.add(changefile, os.path.basename(changefile))
-        for pkg_file in [line.split(" ")[-1] for line in file_lines]:
-            tarball.add("%s/%s" % (base_dir, pkg_file), pkg_file)
+    base_dir = os.path.dirname(changefile) or "."
+    tarball.add(changefile, os.path.basename(changefile))
+    for pkg_file in [line.split(" ")[-1] for line in file_lines]:
+        tarball.add("%s/%s" % (base_dir, pkg_file), pkg_file)
 
 
-        tarball.close()
+    tarball.close()
 
     return (tarball.name, output)
 

@@ -1,0 +1,63 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Format: 1.8
+Date: Tue, 08 Jun 2010 10:31:18 -0700
+Source: puppet
+Binary: puppet puppetmaster puppet-common vim-puppet puppet-el puppet-testsuite
+Architecture: source all
+Version: 0.25.5-sg1
+Distribution: unstable
+Urgency: low
+Maintainer: SimpleGeo Nerds <nerds@simplegeo.com>
+Changed-By: Ian Eure <ian@simplegeo.com>
+Description: 
+ puppet     - centralised configuration management for networks
+ puppet-common - common files for puppet and puppetmaster
+ puppet-el  - Emacs syntax highlighting for puppet manifests
+ puppet-testsuite - centralized configuration management control for networks
+ puppetmaster - centralised configuration management control daemon
+ vim-puppet - Vim syntax highlighting for puppet manifests
+Changes: 
+ puppet (0.25.5-sg1) unstable; urgency=low
+ .
+   * New upstream version.
+   * Cherry-pick commit 722a27fd49fc2c5ac161.
+Checksums-Sha1: 
+ c3ca751ca456e74c02c3a2ad9dcc906e9914dab3 1619 puppet_0.25.5-sg1.dsc
+ 9ea83c9cc8247ef7d32fd7839bb536148d2fa0ed 1415776 puppet_0.25.5.orig.tar.gz
+ a47c77a44c046be06fedc961a75879856ff98811 33707 puppet_0.25.5-sg1.debian.tar.gz
+ 0e1f96760db35f178f43a5ac72ea3a0412cff1c7 208376 puppet_0.25.5-sg1_all.deb
+ 2a24db93c62e494df873741835c6f6053cf143b0 192856 puppetmaster_0.25.5-sg1_all.deb
+ 9bda9949d898f2c18e332fcbcfaf27e14196be60 701846 puppet-common_0.25.5-sg1_all.deb
+ f287f76feb903c758efc4d8b8c9d88fca06ace03 182442 vim-puppet_0.25.5-sg1_all.deb
+ c89dd531cd2a07e528d41995557d0fc605152f8b 184158 puppet-el_0.25.5-sg1_all.deb
+ 76ee34cb64871a91b064bbc23f04f2a9129e5845 841360 puppet-testsuite_0.25.5-sg1_all.deb
+Checksums-Sha256: 
+ 6062c4d6ee14449a1eef94a1da337de6bceb445c5865125482e9d801e8bcd083 1619 puppet_0.25.5-sg1.dsc
+ 54835194844aa2cc00bfdcc1d8931d5d6f8d50f6aa9da1e115a47c06915657bf 1415776 puppet_0.25.5.orig.tar.gz
+ dfbb6db40942f1d52c7124bc3ea49e463cc81b65e58416cba168c49e95653790 33707 puppet_0.25.5-sg1.debian.tar.gz
+ c21cc50f74deb30ad83b9549bd67c3ca6c90a9669b56b5073fdfe0fded73588c 208376 puppet_0.25.5-sg1_all.deb
+ 15e7a933df647a2d05808fb6cd01459741380d9530433cdeb043af003fdd6106 192856 puppetmaster_0.25.5-sg1_all.deb
+ f5bd1c6c85d9ce2cef59d57c4e47f401e9872664a81cd64d1c344d4c3f628ce5 701846 puppet-common_0.25.5-sg1_all.deb
+ 3d479cde9918733c9a77e8fb68d4751f792598e52d833e9a194622c1068f8348 182442 vim-puppet_0.25.5-sg1_all.deb
+ 7dde9fc63ce74808dbe31388d81922afa7c3ad140ed9c952466ba0eb041a952b 184158 puppet-el_0.25.5-sg1_all.deb
+ 395be536e51552835c94809fd3bc679129f25b3031907f4c134066601e4a481d 841360 puppet-testsuite_0.25.5-sg1_all.deb
+Files: 
+ e2d6591e1886731b207bdbc7e826b3c5 1619 admin optional puppet_0.25.5-sg1.dsc
+ a9a30ad5700c5805b8e4e03ed8a65768 1415776 admin optional puppet_0.25.5.orig.tar.gz
+ 7f36b499a92806704c56f5f1fc0b5a20 33707 admin optional puppet_0.25.5-sg1.debian.tar.gz
+ 680c5fb29251c103ee22a11a22bfe83a 208376 admin optional puppet_0.25.5-sg1_all.deb
+ e044545a431d14431edab89aefd33009 192856 admin optional puppetmaster_0.25.5-sg1_all.deb
+ 89512f30c1c41985d364659f7892a1fb 701846 admin optional puppet-common_0.25.5-sg1_all.deb
+ 303919c42eb181a125bb1a6cbe9b0157 182442 admin optional vim-puppet_0.25.5-sg1_all.deb
+ 62cba06304d9c9ecff25531c9cec51e0 184158 admin optional puppet-el_0.25.5-sg1_all.deb
+ f0130dcf8b221352c0c9c77a864914c0 841360 admin optional puppet-testsuite_0.25.5-sg1_all.deb
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (GNU/Linux)
+
+iF4EAREIAAYFAkwOhywACgkQfQ7IQ+uMm7E2MAD7BqXu6/mJROc/PzGijoBSwoKj
+0r975y9RWdpyyCmoSpkBALTxG10CZAMf2Vkrs9uaGBrVF8E9oJrMt+nC6+UEpHiq
+=b2qq
+-----END PGP SIGNATURE-----

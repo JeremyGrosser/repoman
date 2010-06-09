@@ -23,4 +23,5 @@ setup(name='repoman',
                       'simplejson',
                       'decorator',
                       'poster'],
+    tests_require=['nose'],
     )
