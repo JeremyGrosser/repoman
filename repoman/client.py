@@ -197,13 +197,14 @@ def cmd_upload(dist, *pack_files):
 
 
 @explode_slashes
-def cmd_promote(dist, package, dest_dist):
+def cmd_promote(dist, package, *dest_dists):
     """Promote a package to another distribution.
 
-    promote SOURCE_DIST/PACKAGE DEST_DIST
+    promote SOURCE_DIST/PACKAGE DEST_DIST [DEST_DIST2...DEST_DISTN]
     """
-    request("%s/%s/copy?dstdist=%s" % (dist, package, dest_dist),
-            method="POST")
+    for dest in dest_dists:
+        request("%s/%s/copy?dstdist=%s" % (dist, package, dest),
+                method="POST")
     return ""
 
 
