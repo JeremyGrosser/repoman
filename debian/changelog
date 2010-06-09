@@ -1,3 +1,9 @@
+repoman (1.5.1sg5) unstable; urgency=low
+
+  * A decorator import somehow got left in the client; remove it.
+
+ -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 16:26:46 -0700
+
 repoman (1.5.1sg4) unstable; urgency=low
 
   * Fix installation of conf/static resources.
