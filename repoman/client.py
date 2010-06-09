@@ -139,7 +139,7 @@ def create_pack(changefile):
 
     base_dir = os.path.dirname(changefile) or "."
     tarball.add(changefile, os.path.basename(changefile))
-    for pkg_file in [line.split(" ")[-1] for line in file_lines]:
+    for pkg_file in pkg_files:
         tarball.add("%s/%s" % (base_dir, pkg_file), pkg_file)
 
 
