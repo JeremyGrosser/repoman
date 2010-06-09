@@ -1,3 +1,9 @@
+repoman (1.5.1sg4) unstable; urgency=low
+
+  * Fix installation of conf/static resources.
+
+ -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 16:08:58 -0700
+
 repoman (1.5.1sg3) unstable; urgency=low
 
   * Fix upload code which broke in the refactor.

@@ -6,7 +6,7 @@ include /usr/share/cdbs/1/rules/buildcore.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
 
-binary-post-install/python-repoman-server::
+binary-post-install/python-repoman::
 	cp -r $(CURDIR)/conf/* $(CURDIR)/debian/python-repoman-server/etc/repoman/
 	cp -r $(CURDIR)/html $(CURDIR)/debian/python-repoman-server/usr/share/repoman/
 
