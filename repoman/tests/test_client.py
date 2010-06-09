@@ -60,3 +60,13 @@ def test_bad_docs():
 def test_help_commands():
     """Make sure help with no args shows commands."""
     assert client.cmd_help() == client.get_commands()
+
+
+def check_decorated_function_docs(name):
+    assert getattr(getattr(client, 'cmd_%s' % name), '__doc__')
+
+
+def test_decorated_function_docs():
+    """Make sure decorated functions retain their documentation."""
+    for func in ('rm', 'show', 'promote'):
+        yield (check_decorated_function_docs, func)

@@ -15,6 +15,7 @@ import tarfile
 from textwrap import fill, dedent
 from optparse import OptionParser
 from itertools import imap, takewhile
+from functools import wraps
 from urllib import urlencode
 
 try:
@@ -48,6 +49,7 @@ def format_dict(pkg):
 def explode_slashes(func):
     """Explode slashes in args."""
 
+    @wraps(func)
     def __inner__(*args, **kwargs):
         new_args = []
         for arg in args:
