@@ -14,7 +14,7 @@ import os.path
 import tarfile
 from textwrap import fill, dedent
 from optparse import OptionParser
-from itertools import imap
+from itertools import imap, takewhile
 from urllib import urlencode
 
 try:
@@ -115,8 +115,8 @@ def create_pack(changefile):
     with open(changefile) as change:
         contents = change.read()
         source_pkg = contents.split("Source:")[1].strip().split("\n")[0]
-        file_lines = (contents.split("Files:")[1].split("\n"))[1:]
-        file_lines = file_lines[:file_lines.index('')]
+        file_lines = takewhile(lambda line: line.startswith(" "),
+                               (contents.split("Files:")[1].split("\n"))[1:])
 
         tarball = tarfile.open("%s.tar.gz" % source_pkg, 'w:gz',
                                fileobj=output)
