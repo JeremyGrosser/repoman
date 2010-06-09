@@ -71,8 +71,12 @@ def get_commands():
     for name in globals():
         item = globals()[name]
         if name.startswith('cmd_') and callable(item):
-            out.append("  %*s - %s" % (width, name[4:],
-                                       item.__doc__.split("\n")[0]))
+            try:
+                doc = item.__doc__.split("\n")[0]
+            except AttributeError:
+                doc = ""
+
+            out.append("  %*s - %s" % (width, name[4:], doc))
 
     return "\n".join(out)
 
@@ -106,8 +110,10 @@ def request(endpoint="", sub="repository", **kwargs):
         return content or ""
 
 
-def cmd_help(cmd):
+def cmd_help(cmd=None):
     """Show command help."""
+    if not cmd:
+        return get_commands()
     return dedent(globals()['cmd_%s' % cmd].__doc__)
 
 

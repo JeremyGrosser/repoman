@@ -48,3 +48,15 @@ def test_explode_slashes():
     exploded = client.explode_slashes(func)(*unexploded)
     assert exploded == expected, \
         "Expected %r, got %r" % (expected, exploded)
+
+
+def test_bad_docs():
+    """Make sure help works even if docblocks are missing."""
+    client.cmd_fake = lambda: None
+    help_str = client.get_commands()
+    assert "fake" in help_str
+
+
+def test_help_commands():
+    """Make sure help with no args shows commands."""
+    assert client.cmd_help() == client.get_commands()
