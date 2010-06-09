@@ -77,25 +77,6 @@ $ curl -X POST http://repoman.example.com/repository/myotherrepo/digg-example/co
 Delete a package from a distribution
 $ curl -X DELETE http://repoman.example.com/repository/anotherrepo/digg-example
 
-
-You may optionally pass a query argument to specify an output format. Valid formats are json (default), yaml, xml, and pickle
-$ curl -X GET http://repoman.example.com/repository/myotherrepo/digg-example?format=xml
-<?xml version='1.0'?>
-<methodResponse>
-<params>
-<param>
-<value><array><data>
-<value><struct>
-<member>
-<name>SHA1</name>
-<value><string>18327ff3b2ac4e364baf700484fa487a78847a7a</string></value>
-</member>
-<member>
-<name>Maintainer</name>
-<value><string>Jeremy Grosser &lt;synack@digg.com&gt;</string></value>
-</member>
-...
-
 Build a package
 $ curl -X POST -d "cburl=http://repoman.example.com/repository/myotherrepo&ref=origin/master" http://repoman.example.com/buildbot/github/synack/ncore
 
