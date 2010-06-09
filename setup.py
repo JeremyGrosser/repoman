@@ -21,7 +21,6 @@ setup(name='repoman',
                       'webob',
                       'httplib2',
                       'simplejson',
-                      'decorator',
                       'poster'],
     tests_require=['nose'],
     )

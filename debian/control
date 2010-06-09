@@ -10,7 +10,7 @@ XS-Python-Version: all
 Package: python-repoman
 Architecture: all
 XB-Python-Version: ${python:Versions}
-Depends: ${python:Depends}, python-daemon (>= 1.5.0), python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-decorator (>= 3.1.2), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0), reprepro, gnupg, pbuilder
+Depends: ${python:Depends}, python-daemon (>= 1.5.0), python-webob (>= 0.9.7), python-pycurl (>= 7.19.0), python-poster (>= 0.4), python-lockfile (>= 0.8), python-simplejson (>= 2.1.0), python-httplib2 (>= 0.6.0), reprepro, gnupg, pbuilder
 Conflicts: python-repoman-client, python-repoman-server
 Replaces: python-repoman-client, python-repoman-server
 Description: RESTful repository management and buildbot

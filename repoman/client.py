@@ -45,18 +45,20 @@ def format_dict(pkg):
                      for (field, val) in pkg.iteritems())
 
 
-@decorator
-def explode_slashes(func, *args, **kwargs):
+def explode_slashes(func):
     """Explode slashes in args."""
 
-    new_args = []
-    for arg in args:
-        if isinstance(arg, str):
-            new_args.extend(arg.split("/"))
-        else:
-            new_args.append(arg)
+    def __inner__(*args, **kwargs):
+        new_args = []
+        for arg in args:
+            if isinstance(arg, str):
+                new_args.extend(arg.split("/"))
+            else:
+                new_args.append(arg)
 
-    return func(*new_args, **kwargs)
+        return func(*new_args, **kwargs)
+
+    return __inner__
 
 
 def get_commands():

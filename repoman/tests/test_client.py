@@ -39,3 +39,12 @@ def test_parsing():
     fixture_dir = os.path.dirname(__file__) + '/changefiles/'
     for change in (os.listdir(fixture_dir)):
         yield (check_parsing, change, expected)
+
+
+def test_explode_slashes():
+    unexploded = ['foo/bar', 'baz']
+    expected = ('foo', 'bar', 'baz')
+    func = lambda foo, bar, baz: (foo, bar, baz)
+    exploded = client.explode_slashes(func)(*unexploded)
+    assert exploded == expected, \
+        "Expected %r, got %r" % (expected, exploded)
