@@ -1,9 +1,15 @@
-repoman (1.5.1sg5) unstable; urgency=low
+repoman (1.5.1sg6) unstable; urgency=low
 
   * Parse .dsc file referenced in .changes file when packing, otherwise
     we may miss files necessary to upload properly.
 
  -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 17:16:30 -0700
+
+repoman (1.5.1sg5) unstable; urgency=low
+
+  * A decorator import somehow got left in the client; remove it.
+
+ -- Ian Eure <ian@simplegeo.com>  Wed, 09 Jun 2010 16:26:46 -0700
 
 repoman (1.5.1sg4) unstable; urgency=low
 
