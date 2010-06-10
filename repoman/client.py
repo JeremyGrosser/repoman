@@ -135,9 +135,10 @@ def create_pack(changefile):
     with open(changefile, 'r') as change:
         (source_pkg, pkg_files) = _parse_changes(change.read())
 
-    dsc_file = [file_ for file_ in pkg_files if file_.endswith(".dsc")][0]
-    with open("%s/%s" % (change_dir, dsc_file), 'r') as dscfile:
-        pkg_files += _parse_changes(dscfile.read())[1]
+    dsc_file = [file_ for file_ in pkg_files if file_.endswith(".dsc")]
+    if dsc_file:
+        with open("%s/%s" % (change_dir, dsc_file[0]), 'r') as dscfile:
+            pkg_files += _parse_changes(dscfile.read())[1]
 
     tarball = tarfile.open("%s.tar.gz" % source_pkg, 'w:gz',
                            fileobj=output)
