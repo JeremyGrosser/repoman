@@ -196,7 +196,11 @@ def cmd_upload(dist, *pack_files):
                 buf += "While uploading %s: %s" % (file_, output)
                 continue
 
-            buf += "\n\n".join(format_dict(pkg[0]) for pkg in output)
+            try:
+                buf += "\n\n".join(format_dict(pkg[0]) for pkg in output)
+            except IndexError:
+                buf += "While uploading %s: %s" % (file_, output)
+                continue
         finally:
             pack.close()
 
