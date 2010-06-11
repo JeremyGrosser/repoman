@@ -53,9 +53,10 @@ body {
 }
 
 #log {
-	width: 620px;
+	width: 100%;
+	height: 350px;
 	font-family: monospace;
-	overflow-x: auto;
+	overflow: auto;
 }
 
 #detail label {

@@ -136,7 +136,7 @@ function build_start() {
 
 	$.post(apiurl + '/buildbot/' + gitrepo + '.git', {
 			ref: gitref,
-			cburl: apiurl + '/repository/' + uploadto,
+			cburl: apiurl + '/repository/' + uploadto + ',http://lamgmt.digg.internal:9998/repository/' + uploadto,
 			submodules: 1
 		},
 		function(data) {
@@ -153,6 +153,9 @@ function build_update(data, textStatus) {
 	log = log.replace('>', '&gt;');
 	//log = log.replace('\n', '<br />')
 	$('#status #log').html('<pre>' + log + '</pre>');
+	logdiv = document.getElementById('log');
+	logdiv.scrollTop = logdiv.scrollHeight;
+	console.log(logdiv.scrollTop);
 	if(data.status != 200) {
 		setTimeout(build_status, 3000);
 	}else{
