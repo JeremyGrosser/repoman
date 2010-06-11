@@ -212,6 +212,13 @@ def build_thread(gitpath, ref, buildid, environment, cburl=None, submodules=Fals
                 continue
 
 
-def build_worker(gitpath, ref, buildid, cburl, submodules):
-    if os.fork() == 0:
-        build_thread(gitpath, ref, buildid, cburl, submodules)
+def build_worker():
+    logging.info('Build worker process now running, pid %i' % os.getpid())
+    while True:
+        logging.info('Build queue is %i jobs deep' % buildq.qsize())
+        try:
+            job = buildq.get()
+            print 'jobspec:', repr(job)
+            build_thread(*job)
+        except:
+            logging.warning('Build worker caught exception: %s' % format_exc())

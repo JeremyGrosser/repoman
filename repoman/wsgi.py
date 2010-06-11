@@ -1,4 +1,5 @@
 from webob import Request, Response
+from os.path import normpath
 import httplib
 import os.path
 import re
@@ -10,6 +11,31 @@ import buildbot
 import repository
 from common import StaticHandler, WSGIRequestHandler
 
+from config import conf
+
+class RequestHandler(object):
+    def __init__(self, app, request):
+        self.app = app
+        self.request = request
+
+class StaticHandler(RequestHandler):
+    def get(self, filename):
+        static = conf('server.static_path')
+
+        if not filename:
+            filename = 'index.html'
+
+        filename = normpath('%s/%s' % (static, filename))
+        if not filename.startswith(static):
+            return Response(status=400, body='400 Bad Request\nYou cannot escape the static root.\n')
+        else:
+            return Response(status=200, body=file(filename, 'r').read())
+
+class IndexRedirectHandler(RequestHandler):
+    def get(self):
+        response = Response(status=302)
+        response.location = self.request.path_url.rstrip('/') + '/static/'
+        return response
 
 class Application(object):
     def __init__(self, extra_urls=None):
