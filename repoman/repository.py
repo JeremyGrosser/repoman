@@ -4,6 +4,7 @@ from webob import Response
 from common import RequestHandler
 
 from subprocess import Popen, PIPE
+from base64 import b64decode
 import logging
 import os.path
 import os
@@ -184,6 +185,15 @@ class DistHandler(RequestHandler):
         return response
 
 class PackageHandler(RequestHandler):
+    def basic_auth(self):
+        print repr(self.request.headers.items())
+        if 'Authorization' in self.request.headers:
+            auth = self.request.headers['Authorization'].split(' ', 1)[1]
+            username, password = b64decode(auth).split(':', 1)
+            if username == conf('auth.username') and password == conf('auth.password'):
+                return True
+        return False
+
     def get(self, dist, package):
         repo = Repository(conf('repository.path'))
 
@@ -211,6 +221,10 @@ class PackageHandler(RequestHandler):
         if not dist or not package or not action:
             return Response(status=405)
 
+        if self.request.params.get('dstdist', None) == 'digg-stable-lenny':
+            if not self.basic_auth():
+                return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
+
         if action == 'copy':
             if not 'dstdist' in self.request.params:
                 return Response(status=400, body='A required parameter, dstdist is missing')
@@ -219,6 +233,7 @@ class PackageHandler(RequestHandler):
 
     def delete(self, dist=None, package=None, action=None):
         repo = Repository(conf('repository.path'))
+
         if action:
             return Response(status=405, body='You cannot delete an action')
         if not dist or not package:

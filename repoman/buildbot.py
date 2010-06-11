@@ -2,8 +2,8 @@ from simplejson import dumps
 from webob import Response
 from pycurl import Curl
 
-from subprocess import Popen, PIPE
-from multiprocessing import Queue
+from subprocess import Popen, PIPE, STDOUT
+from multiprocessing import Process, Queue
 from traceback import format_exc
 from time import sleep
 import logging
@@ -58,12 +58,15 @@ class GitRepository(object):
         stdout, stderr = output
         return [x.split(' ', 1) for x in stdout.split('\n') if x]
 
-    def build(self, signkey, pbuilderrc, resultsdir):
+    def build(self, signkey, pbuilderrc, resultsdir, logfile):
         if 'refs/heads/upstream' in [x[1] for x in self.show_ref()]:
             cmd = ['/usr/bin/git-buildpackage', '--git-sign', '--git-cleaner="fakeroot debian/rules clean"', '--git-keyid="%s"' % signkey, '--git-builder="pdebuild --debsign-k %s --auto-debsign --configfile %s --debbuildopts "-i.git -I.git -sa" --buildresult %s' % (signkey, pbuilderrc, resultsdir)]
         else:
-            cmd = ['/usr/bin/pdebuild', '--debsign-k', signkey, '--auto-debsign', '--debbuildopts', '-i.git -I.git -sa', '--configfile', pbuilderrc, '--buildresult', resultsdir]
-        return self._cmd(cmd)
+            cmd = ['/usr/bin/pdebuild', '--debsign-k', signkey, '--auto-debsign', '--debbuildopts', '-i\.git -I.git -sa', '--configfile', pbuilderrc, '--buildresult', resultsdir]
+
+        buildlog = file(logfile, 'a+')
+        p = Popen(cmd, stdout=buildlog, stderr=STDOUT)
+        return p.wait()
 
 class PackageHandler(RequestHandler):
     def get(self, gitpath, gitrepo):
@@ -159,10 +162,11 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
 
     resultsdir = os.path.join(tmpdir, '.build_results')
     os.makedirs(resultsdir)
-    output, retcode = repo.build(conf('buildbot.signkey'), conf('buildbot.pbuilderrc'), resultsdir)
 
-    buildlog(buildid, output[0])
-    buildlog(buildid, output[1])
+    outputfile = os.path.join(conf('buildbot.buildpath'), '%s/build.log' % buildid)
+    retcode = repo.build(conf('buildbot.signkey'), conf('buildbot.pbuilderrc'), resultsdir, outputfile)
+
+    logging.debug('build returned %i' % retcode)
     #logging.debug(output[0])
     #logging.debug(output[1])
 
@@ -182,14 +186,19 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
     buildlog(buildid, 'Built %i byte tarball' % len(data))
 
     if cburl:
-        buildlog(buildid, 'Performing callback: %s' % cburl)
-        req = Curl()
-        req.setopt(req.POST, 1)
-        req.setopt(req.URL, str(cburl))
-        req.setopt(req.HTTPPOST, [('package', (req.FORM_FILE, str(tarpath)))])
-        req.setopt(req.WRITEDATA, file('%s/build.log' % tmpdir, 'a+'))
-        req.perform()
-        req.close()
+        for url in cburl.split(','):
+            try:
+                buildlog(buildid, 'Performing callback: %s' % url)
+                req = Curl()
+                req.setopt(req.POST, 1)
+                req.setopt(req.URL, url)
+                req.setopt(req.HTTPPOST, [('package', (req.FORM_FILE, str(tarpath)))])
+                req.setopt(req.WRITEDATA, file('%s/build.log' % tmpdir, 'a+'))
+                req.perform()
+                req.close()
+            except:
+                buildlog(buildid, 'Callback to %s failed: %s' % (url, format_exc()))
+                continue
 
 
 def build_worker(gitpath, ref, buildid, cburl, submodules):
