@@ -136,7 +136,7 @@ function build_start() {
 
 	$.post(apiurl + '/buildbot/' + gitrepo + '.git', {
 			ref: gitref,
-			cburl: apiurl + '/repository/' + uploadto,
+			cburl: '/repository/' + uploadto,
 			submodules: 1
 		},
 		function(data) {
