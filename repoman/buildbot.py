@@ -5,6 +5,7 @@ from pycurl import Curl
 from subprocess import Popen, PIPE, STDOUT
 from multiprocessing import Process, Queue
 from traceback import format_exc
+from urlparse import urljoin
 from time import sleep
 import logging
 import tarfile
@@ -194,6 +195,9 @@ def build_thread(gitpath, ref, buildid, environment, cburl=None, submodules=Fals
 
     if cburl:
         for url in cburl.split(','):
+            if not url.startswith('http://'):
+                url = urljoin('http://127.0.0.1/', url)
+
             try:
                 buildlog(buildid, 'Performing callback: %s' % url)
                 req = Curl()
