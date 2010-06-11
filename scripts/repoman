@@ -12,8 +12,6 @@ from repoman.wsgi import Application
 from repoman import repository, buildbot, wsgi
 
 app = Application([
-    ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/(?P<action>\w+)/*$',
-        repository.PackageHandler),
     ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/*$',
         repository.PackageHandler),
     ('^/repository/(?P<dist>[-\w]+)/*$',

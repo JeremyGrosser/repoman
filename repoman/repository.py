@@ -149,7 +149,42 @@ class DistHandler(RequestHandler):
         repo = Repository(conf('repository.path'))
         return Response(body=dumps(repo.get_packages(dist).keys()))
 
+    def post_copy(self, dist, package, srcdist):
+        dstdist = dist
+        if dstdist in conf('repository.backup'):
+            repo.backup_package(dstdist, conf('repository.backup')[dstdist], package)
+        repo.copy_package(srcdist, dstdist, package)
+        return Response(status=200)
+
+    def post_rollback(self, dist, package):
+        if dist in conf('repository.backup'):
+            backupdist = conf('repository.backup')[dist]
+        else:
+            errormsg = 'Attempt to rollback in a dist not defined by repository.backup. Refusing to do it.'
+            logging.error(errormsg)
+            return Response(status=400, body=errormsg + '\n')
+        repo.rollback_package(dist, backupdist, package)
+        return Response(status=200)
+
     def post(self, dist):
+        repo = Repository(conf('repository.path'))
+
+        body = self.request.body.read()
+        for query in re.split('\s+', body):
+            query = dict([(k, v[0]) for k,v in list(parse_qs(query))])
+            for field in ('package', 'action'):
+                if not field in query:
+                    return Response(status=400, body='Required field %s is missing from POST body\n' % field)
+
+        if hasattr('post_' + query['action'], self):
+            func = getattr('post_' + query['action'], self)
+            del query['action']
+            return func(dist, **query)
+
+        if not dist or not package or not action:
+            return Response(status=405)
+
+    def put(self, dist):
         repo = Repository(conf('repository.path'))
         response = None
 
@@ -198,15 +233,6 @@ class DistHandler(RequestHandler):
         return response
 
 class PackageHandler(RequestHandler):
-    def basic_auth(self):
-        print repr(self.request.headers.items())
-        if 'Authorization' in self.request.headers:
-            auth = self.request.headers['Authorization'].split(' ', 1)[1]
-            username, password = b64decode(auth).split(':', 1)
-            if username == conf('auth.username') and password == conf('auth.password'):
-                return True
-        return False
-
     def get(self, dist, package):
         repo = Repository(conf('repository.path'))
 
@@ -229,46 +255,8 @@ class PackageHandler(RequestHandler):
                 return Response(status=404, body=dumps([]))
             return Response(status=200, body=dumps(result))
 
-    def post(self, dist=None, package=None, action=None):
+    def delete(self, dist, package):
         repo = Repository(conf('repository.path'))
-        if not dist or not package or not action:
-            return Response(status=405)
-
-        if self.request.params.get('dstdist', None) == 'digg-stable-lenny' and \
-            not package in conf('repository.whitelist'):
-            if not self.basic_auth():
-                return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
-
-        if action == 'copy':
-            if not 'dstdist' in self.request.params:
-                return Response(status=400, body='A required parameter, dstdist is missing')
-            if self.request.params['dstdist'] == 'digg-stable-lenny':
-                
-                repo.backup_package(self.request.params['dstdist'], conf('repository.backupdist'), package)
-
-            repo.copy_package(dist, self.request.params['dstdist'], package)
-            return Response(status=200)
-        
-        if action == 'rollback':
-            if dist != 'digg-stable-lenny':
-                errormsg = "Attempt to rollback in a dist other than digg-stable-lenny. You probably don't want this. Refusing to do it."
-                logging.error(errormsg)
-                return Response(status=400, body=errormsg + '\n')
-            repo.rollback_package(dist, conf('repository.backupdist'), package)
-            return Response(status=200)
-
-    def delete(self, dist=None, package=None, action=None):
-        repo = Repository(conf('repository.path'))
-
-        if self.request.params.get('dstdist', None) == 'digg-stable-lenny' and \
-            not package in conf('repository.whitelist'):
-            if not self.basic_auth():
-                return Response(status=401, headers=[('WWW-Authenticate', 'Basic realm=digg-stable-lenny')])
-
-        if action:
-            return Response(status=405, body='You cannot delete an action')
-        if not dist or not package:
-            return Response(status=400, body='You must specify a dist and package to delete from it')
 
         result = repo.remove_package(dist, package)
         if result:
