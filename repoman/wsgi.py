@@ -71,8 +71,6 @@ def get_server():
 
 
 DEFAULT_URLS = [
-    ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/(?P<action>\w+)/*$',
-     repository.PackageHandler),
     ('^/repository/(?P<dist>[-\w]+)/(?P<package>[a-z0-9][a-z0-9+-.]+)/*$',
      repository.PackageHandler),
     ('^/repository/(?P<dist>[-\w]+)/*$',
