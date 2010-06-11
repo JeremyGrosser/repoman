@@ -136,7 +136,7 @@ function build_start() {
 
 	$.post(apiurl + '/buildbot/' + gitrepo + '.git', {
 			ref: gitref,
-			cburl: apiurl + '/repository/' + uploadto + ',http://lamgmt.digg.internal:9998/repository/' + uploadto,
+			cburl: apiurl + '/repository/' + uploadto,
 			submodules: 1
 		},
 		function(data) {
