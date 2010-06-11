@@ -1,3 +1,10 @@
+repoman (1.5.1sg7) unstable; urgency=low
+
+  * Fix issue where binary-only packages wouldn't upload because they had
+    no .dsc file referenced.
+
+ -- Ian Eure <ian@simplegeo.com>  Thu, 10 Jun 2010 13:02:09 -0700
+
 repoman (1.5.1sg6) unstable; urgency=low
 
   * Parse .dsc file referenced in .changes file when packing, otherwise
