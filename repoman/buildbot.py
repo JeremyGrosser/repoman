@@ -84,10 +84,11 @@ class PackageHandler(RequestHandler):
         ref = self.request.params['ref']
         cburl = self.request.params.get('cburl', None)
         submodules = self.request.params.get('submodules', None)
+        environment = self.request.params.get('environment', 'stable')
 
         buildid = uuid.uuid4().hex
 
-        build_worker(gitpath, ref, buildid, cburl, submodules)
+        buildq.put((gitpath, ref, buildid, environment, cburl, submodules))
         return Response(status=200, body=buildid + '\n')
 
 class RepoListHandler(RequestHandler):
@@ -138,9 +139,15 @@ def buildlog(buildid, message):
     fd.close()
     logging.debug(message)
 
-def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
+def build_thread(gitpath, ref, buildid, environment, cburl=None, submodules=False):
     tmpdir = os.path.join(conf('buildbot.buildpath'), buildid)
     repo = GitRepository(tmpdir)
+
+    try:
+        pbuilderrc = conf('buildbot.environments.%s' % environment)
+    except KeyError:
+        buildlog(buildid, 'No pbuilderrc defined for environment %s, using stable' % environment)
+        pbuilderrc = conf('buildbot.environments.stable')
 
     output, retcode = repo.clone(gitpath)
     if retcode:
@@ -164,7 +171,7 @@ def build_thread(gitpath, ref, buildid, cburl=None, submodules=False):
     os.makedirs(resultsdir)
 
     outputfile = os.path.join(conf('buildbot.buildpath'), '%s/build.log' % buildid)
-    retcode = repo.build(conf('buildbot.signkey'), conf('buildbot.pbuilderrc'), resultsdir, outputfile)
+    retcode = repo.build(conf('buildbot.signkey'), pbuilderrc, resultsdir, outputfile)
 
     logging.debug('build returned %i' % retcode)
     #logging.debug(output[0])
