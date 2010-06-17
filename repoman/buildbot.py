@@ -1,9 +1,11 @@
+from poster.streaminghttp import register_openers
+from poster.encode import multipart_encode
 from simplejson import dumps
 from webob import Response
-from pycurl import Curl
 
 from subprocess import Popen, PIPE, STDOUT
 from multiprocessing import Process, Queue
+from urllib2 import Request, urlopen
 from traceback import format_exc
 from urlparse import urljoin
 from time import sleep
@@ -18,6 +20,8 @@ import os
 
 from config import conf
 from common import RequestHandler
+
+register_openers()
 
 class GitRepository(object):
     def __init__(self, path=None):
@@ -59,15 +63,12 @@ class GitRepository(object):
         stdout, stderr = output
         return [x.split(' ', 1) for x in stdout.split('\n') if x]
 
-    def build(self, signkey, pbuilderrc, resultsdir, logfile):
+    def build(self, signkey, pbuilderrc, resultsdir):
         if 'refs/heads/upstream' in [x[1] for x in self.show_ref()]:
             cmd = ['/usr/bin/git-buildpackage', '--git-sign', '--git-cleaner="fakeroot debian/rules clean"', '--git-keyid="%s"' % signkey, '--git-builder="pdebuild --debsign-k %s --auto-debsign --configfile %s --debbuildopts "-i.git -I.git -sa" --buildresult %s' % (signkey, pbuilderrc, resultsdir)]
         else:
             cmd = ['/usr/bin/pdebuild', '--debsign-k', signkey, '--auto-debsign', '--debbuildopts', '-i\.git -I.git -sa', '--configfile', pbuilderrc, '--buildresult', resultsdir]
-
-        buildlog = file(logfile, 'a+')
-        p = Popen(cmd, stdout=buildlog, stderr=STDOUT)
-        return p.wait()
+        return Popen(cmd, stdout=PIPE, stderr=STDOUT)
 
 class PackageHandler(RequestHandler):
     def get(self, gitpath, gitrepo):
@@ -82,15 +83,19 @@ class PackageHandler(RequestHandler):
             return Response(status=400, body='Required parameter "ref" is missing. You must pass a git tag, branch, or commit ID to be built.\n')
 
         gitpath = os.path.join(conf('buildbot.gitpath.%s' % gitpath), gitrepo)
-        ref = self.request.params['ref']
+        gitref = self.request.params['ref']
         cburl = self.request.params.get('cburl', None)
         submodules = self.request.params.get('submodules', None)
         environment = self.request.params.get('environment', 'stable')
 
-        buildid = uuid.uuid4().hex
+        if cburl:
+            cburl = cburl.split(',')
+        else:
+            cburl = []
 
-        buildq.put((gitpath, ref, buildid, environment, cburl, submodules))
-        return Response(status=200, body=buildid + '\n')
+        build = BuildTask(gitpath, gitref, environment, callbacks=cburl, bool(submodules))
+        buildq.put(build)
+        return Response(status=200, body=build.id + '\n')
 
 class RepoListHandler(RequestHandler):
     def get(self, gitpath):
@@ -133,92 +138,107 @@ class StatusHandler(RequestHandler):
         else:
             return Response(status=200, body='Build complete.\n' + log)
 
-def buildlog(buildid, message):
-    filename = os.path.join(conf('buildbot.buildpath'), '%s/build.log' % buildid)
-    fd = file(filename, 'a+')
-    fd.write(message + '\n')
-    fd.close()
-    logging.debug(message)
+class BuildTask(object):
+    def __init__(self, gitpath, gitref, environment, callbacks=[], submodules=False):
+        self.gitpath = gitpath
+        self.gitref = gitref
+        self.environment = environment
+        self.callbacks = callbacks
+        self.submodules = submodules
+        self.id = uuid.uuid4().hex
+        self.status = 'init'
 
-def build_thread(gitpath, ref, buildid, environment, cburl=None, submodules=False):
-    tmpdir = os.path.join(conf('buildbot.buildpath'), buildid)
-    repo = GitRepository(tmpdir)
+        self.tmpdir = os.path.join(conf('buildbot.buildpath'), self.id)
+        self.resultsdir = os.path.join(self.tmpdir, '.build_results')
+        os.makedirs(self.resultsdir)
 
-    try:
-        pbuilderrc = conf('buildbot.environments.%s' % environment)
-    except KeyError:
-        buildlog(buildid, 'No pbuilderrc defined for environment %s, using stable' % environment)
-        pbuilderrc = conf('buildbot.environments.stable')
+        self.setup()
 
-    output, retcode = repo.clone(gitpath)
-    if retcode:
-        buildlog(buildid, 'Unable to clone %s. %s\n' % (gitpath, '\n'.join(output)))
-        return
+    def set_status(self, status):
+        self.log('Build status: %s -> %s' % (self.status, status))
+        self.status = status
 
-    output, retcode = repo.checkout(ref)
-    if retcode:
-        buildlog(buildid, 'Unable to checkout %s. %s\n' % (ref, '\n'.join(output)))
-        return
+    def log(self, msg):
+        sys.stderr.write('%s: %s\n' % (self.id, msg))
+        sys.stderr.flush()
 
-    if submodules:
-        output, retcode = repo.submodule_init()
-        buildlog(buildid, output[0])
-        buildlog(buildid, output[1])
-        output, retcode = repo.submodule_update()
-        buildlog(buildid, output[0])
-        buildlog(buildid, output[1])
+    def setup(self):
+        self.repo = GitRepository(tmpdir)
 
-    resultsdir = os.path.join(tmpdir, '.build_results')
-    os.makedirs(resultsdir)
+        try:
+            pbuilderrc = conf('buildbot.environments.%s' % environment)
+        except KeyError:
+            self.log('No pbuilderrc defined for environment %s, using stable' % environment)
+            pbuilderrc = conf('buildbot.environments.stable')
 
-    outputfile = os.path.join(conf('buildbot.buildpath'), '%s/build.log' % buildid)
-    retcode = repo.build(conf('buildbot.signkey'), pbuilderrc, resultsdir, outputfile)
+        self.set_status('git clone')
+        output, retcode = repo.clone(gitpath)
+        if retcode:
+            self.log('Unable to clone %s. %s\n' % (gitpath, '\n'.join(output)))
+            return
 
-    logging.debug('build returned %i' % retcode)
-    #logging.debug(output[0])
-    #logging.debug(output[1])
+        self.set_status('git checkout')
+        output, retcode = repo.checkout(ref)
+        if retcode:
+            self.log('Unable to checkout %s. %s\n' % (ref, '\n'.join(output)))
+            return
 
-    os.chdir(resultsdir)
-    if not os.listdir(resultsdir) or retcode != 0:
-        buildlog(buildid, 'Nothing in results directory. Giving up.')
-        return
+        if submodules:
+            self.set_status('git submodule')
+            output, retcode = repo.submodule_init()
+            output, retcode = repo.submodule_update()
+            self.log('Updated submodules')
 
-    tarpath = os.path.join(tmpdir, 'package.tar.gz')
-    tar = tarfile.open(tarpath, 'w:gz')
-    for name in os.listdir(resultsdir):
-        tar.add(name)
-    tar.close()
+        self.set_status('setup done')
 
-    buildlog(buildid, 'Build complete. Results in %s\n' % tarpath)
-    data = file(tarpath, 'rb').read()
-    buildlog(buildid, 'Built %i byte tarball' % len(data))
+    def build(self):
+        proc = repo.build(conf('buildbot.signkey'), pbuilderrc, resultsdir)
+        self.set_status('building')
+        for line in proc.stdout.readlines():
+            self.log(line)
+        retcode = proc.wait()
+        self.set_status('build done')
 
-    if cburl:
-        for url in cburl.split(','):
+        upload_results()
+
+    def upload_results(self):
+        os.chdir(resultsdir)
+        if not os.listdir(resultsdir) or retcode != 0:
+            self.log('Nothing in results directory. Giving up.')
+            return
+
+        self.set_status('make tarball')
+        tarpath = os.path.join(tmpdir, 'package.tar.gz')
+        tar = tarfile.open(tarpath, 'w:gz')
+        for name in os.listdir(resultsdir):
+            tar.add(name)
+        tar.close()
+
+        self.log('Build complete. Results in %s\n' % tarpath)
+
+        self.set_status('upload callback')
+        for url in self.callbacks:
             if not url.startswith('http://'):
                 url = urljoin('http://127.0.0.1:%i/' % conf('server.bind_port'), url)
-
             try:
-                buildlog(buildid, 'Performing callback: %s' % url)
-                req = Curl()
-                req.setopt(req.POST, 1)
-                req.setopt(req.URL, url)
-                req.setopt(req.HTTPPOST, [('package', (req.FORM_FILE, str(tarpath)))])
-                req.setopt(req.WRITEDATA, file('%s/build.log' % tmpdir, 'a+'))
-                req.perform()
-                req.close()
+                self.log('Performing callback: %s' % url)
+                datagen, headers = multipart_encode({'package': open(tarpath, 'rb')})
+                req = Request(url, datagen, headers)
+                response = urlopen(req).read()
             except:
-                buildlog(buildid, 'Callback to %s failed: %s' % (url, format_exc()))
+                self.log('Callback to %s failed: %s' % (url, format_exc()))
                 continue
+        self.set_status('upload finished')
 
+class BuildWorker(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
 
-def build_worker():
-    logging.info('Build worker process now running, pid %i' % os.getpid())
-    while True:
-        logging.info('Build queue is %i jobs deep' % buildq.qsize())
-        try:
-            job = buildq.get()
-            print 'jobspec:', repr(job)
-            build_thread(*job)
-        except:
-            logging.warning('Build worker caught exception: %s' % format_exc())
+    def run(self):
+        while True:
+            task = self.queue.get()
+            try:
+                task.build()
+            except:
+                sys.stderr.write('task.build() threw an exception!\n%s\n' % format_exc())

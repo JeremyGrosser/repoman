@@ -1,22 +1,13 @@
+from wsgiref.simple_server import make_server
 from webob import Request, Response
 from os.path import normpath
-import httplib
-import os.path
+from threading import Queue
 import re
-from wsgiref.simple_server import make_server
 
+from common import StaticHandler, WSGIRequestHandler, RequestHandler
 from config import conf
-
 import buildbot
 import repository
-from common import StaticHandler, WSGIRequestHandler
-
-from config import conf
-
-class RequestHandler(object):
-    def __init__(self, app, request):
-        self.app = app
-        self.request = request
 
 class StaticHandler(RequestHandler):
     def get(self, filename):
@@ -38,10 +29,16 @@ class IndexRedirectHandler(RequestHandler):
         return response
 
 class Application(object):
-    def __init__(self, extra_urls=None):
+    def __init__(self, extra_urls=None, build_workers=4):
         extra_urls = extra_urls or []
         self.handlers = [(re.compile(pattern), handler)
                          for pattern, handler in DEFAULT_URLS + extra_urls]
+
+        self.jobqueue = Queue()
+        for i in range(build_workers):
+            worker = buildbot.BuildWorker(self.jobqueue)
+            worker.setDaemon(True)
+            worker.start()
 
     def __call__(self, environ, start_response):
         request = Request(environ)
@@ -66,7 +63,8 @@ class Application(object):
 
 def get_server():
     return make_server(conf('server.bind_address'),
-                         conf('server.bind_port'), Application(),
+                         conf('server.bind_port'), Application(
+                            build_workers=conf('buildbot.workers')),
                          handler_class=WSGIRequestHandler)
 
 

@@ -22,6 +22,7 @@ if not config:
 
 def conf(key):
     obj = config
+
     for k in key.split('.'):
         obj = obj[k]
     return obj
