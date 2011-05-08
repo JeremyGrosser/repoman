@@ -5,6 +5,7 @@
 #
 
 import wsgiref.simple_server as wsgi_server
+from repoman.config import conf
 
 class RequestHandler(object):
     def __init__(self, app, request):
