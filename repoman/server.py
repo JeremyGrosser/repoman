@@ -29,7 +29,7 @@ def get_context():
 def main():
     parser = OptionParser()
     parser.add_option("-l", "--logging-config", help="Logging config file", default="/etc/repoman/logging.conf")
-    parser.add_option("-w", "--web-config", help="Web config file", default="/etc/repoman/logging.conf")
+    parser.add_option("-w", "--web-config", help="Web config file", default="/etc/repoman/web.conf")
     (options, args) = parser.parse_args()
     set_log_conf(options.logging_config)
     set_web_conf(options.web_config)
