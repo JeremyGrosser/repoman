@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 import sys
-
 import daemon
 
-from repoman.config import conf
+from optparse import OptionParser
+
+from repoman.config import conf, set_log_conf, set_web_conf
 from repoman.wsgi import get_server
 from repoman import repository
 from repoman import buildbot
+
 
 def get_context():
     context = {'working_directory': '.',
@@ -24,9 +26,13 @@ def get_context():
 
     return daemon.DaemonContext(**context)
 
-
-
 def main():
+    parser = OptionParser()
+    parser.add_option("-l", "--logging-config", help="Logging config file", default="/etc/repoman/logging.conf")
+    parser.add_option("-w", "--web-config", help="Web config file", default="/etc/repoman/logging.conf")
+    (options, args) = parser.parse_args()
+    set_log_conf(options.logging_config)
+    set_web_conf(options.web_config)
     with get_context():
         get_server().serve_forever()
 
