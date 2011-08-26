@@ -201,3 +201,15 @@ If you're going to run repomand under something like supervisor, be *sure* to se
 Be sure the user repomand runs as has permissions to write to the specified logging directory.
 
 Be sure to set the `REPOMAN_API_URL` environment variable. This will typically be set to `http://localhost:9998`.
+
+An example config file for supervisor might look like this:
+
+    [program:repoman]
+    command=/usr/bin/repomand
+    autostart=true
+    autorestart=true
+    redirect_stderr=true
+    stdout_logfile=/var/log/repoman/repoman-stdout.log
+    user=jenkins
+    exitcodes=0
+
