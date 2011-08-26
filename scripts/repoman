@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+import repoman.client
+repoman.client.main()
