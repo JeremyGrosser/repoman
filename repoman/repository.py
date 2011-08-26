@@ -89,7 +89,7 @@ class Repository(object):
     def sign(self, dist):
         self._reprepro('export %s' % dist)
 
-        gpg = GPG()
+        gpg = GPG(gnupghome=conf('repository.gpghome'))
         filename = os.path.join(self.path, 'dists/%s/Release' % dist)
         detach_file = filename + '.gpg'
         try:
