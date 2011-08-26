@@ -13,5 +13,8 @@ binary-post-install/python-repoman::
 	install -d -m 0755 $(CURDIR)/debian/python-repoman/usr/share/repoman/
 	cp -r $(CURDIR)/html $(CURDIR)/debian/python-repoman/usr/share/repoman/
 
+	install -d -m 0755 $(CURDIR)/debian/python-repoman/etc/profile.d/
+	install -m 0644 $(CURDIR)/debian/repoman.sh $(CURDIR)/debian/python-repoman/etc/profile.d/
+
 clean::
 	-rm -rf build
