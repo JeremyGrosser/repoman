@@ -3,7 +3,7 @@ Section: python
 Priority: extra
 Maintainer: Jeremy Grosser <synack@digg.com>
 Build-Depends: cdbs, debhelper (>= 7)
-Build-Depends-Indep: python-dev, python-support (>= 0.2.3)
+Build-Depends-Indep: python-dev, python-support (>= 0.2.3), python-setuptools
 Standards-Version: 3.8.4
 XS-Python-Version: all
 

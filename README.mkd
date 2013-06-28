@@ -194,3 +194,22 @@ The last component of the URL is the build ID returned by the initial build POST
 
 Returns the tarball binary if the build is done or an informative message otherwise. Completed builds may only be available for up to 24 hours. After which, the build directories are cleaned and removed.
 
+### Caveats
+
+If you're going to run repomand under something like supervisor, be *sure* to set daemonize to false in `web.conf`.
+
+Be sure the user repomand runs as has permissions to write to the specified logging directory.
+
+Be sure to set the `REPOMAN_API_URL` environment variable. This will typically be set to `http://localhost:9998`. If you build a Debian package using the included things in the debian/ directory, this will be done for you.
+
+An example config file for supervisor might look like this:
+
+    [program:repoman]
+    command=/usr/bin/repomand
+    autostart=true
+    autorestart=true
+    redirect_stderr=true
+    stdout_logfile=/var/log/repoman/repoman-stdout.log
+    user=jenkins
+    exitcodes=0
+
