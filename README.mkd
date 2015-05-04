@@ -1,5 +1,7 @@
 # Repoman
 
+*This project is largely unmaintained. Use it at your own risk.*
+
 Repoman is a RESTful client/server interface for managing Debian repositories and building packages.
 
 ## Commandline client
